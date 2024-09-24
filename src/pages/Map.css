@@ -1,0 +1,36 @@
+/* src/Map.css */
+.map-container {
+  position: relative;
+  height: calc(100vh - 50px);
+  width: 100%;
+  overflow: hidden;
+}
+
+#map {
+  position: absolute;
+  top: 0px; /* Adjusted for MainHeader + ToolPanel height */
+  left: 0;
+  height: calc(100vh - 50px); /* Adjust height for headers */
+  width: 100%;
+  z-index: 1;
+}
+.area-tooltip {
+  background-color: white;
+  color: black;
+  padding: 2px 5px;
+  border-radius: 3px;
+  border: 1px solid #333;
+  font-size: 12px;
+}
+.info-section {
+  padding: 20px;
+  height: calc(100vh - 50px); /* Adjusted for MainHeader height */
+  overflow-y: auto;
+}
+.hidden-map {
+  display: none;
+}
+
+.visible-map {
+  display: block;
+}

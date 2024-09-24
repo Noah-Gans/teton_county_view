@@ -1,0 +1,9 @@
+.print-container {
+    position: absolute;
+    top: 40px; /* Adjust based on header */
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 40px);
+    background: white; /* Opaque white background */
+    z-index: 10; /* High z-index to overlay on top of map */
+  }

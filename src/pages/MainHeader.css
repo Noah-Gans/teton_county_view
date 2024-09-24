@@ -1,0 +1,45 @@
+/* src/components/MainHeader.css */
+.main-header {
+  display: flex;
+  background-color: black;
+  border-bottom: 2px solid black;
+  height: 40px;
+}
+
+
+.header-tab {
+  margin-top: auto;
+  gap: 10px;
+  margin-left: 10px;
+  height: 30px;
+  background-color: #f1f1f1;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s;
+  text-decoration: none;
+  color: black;
+  width: 200px; /* Ensure it spans the full width of the header */
+  display: flex;
+  align-items: center; /* Center text vertically */
+  justify-content: center; /* Center text horizontally */
+  border-top-left-radius: 5px; /* Round top-left corner */
+  border-top-right-radius: 5px; /* Round top-right corner */
+  border-top: solid black 2px;
+  border-left: solid black 2px;
+  border-right: solid black 2px;
+
+}
+
+
+.header-tab.active {
+  background-color: #9d7715;
+  color: white;
+}
+
+.update-time {
+  text-align: center;
+  margin: auto;
+
+  font-size: 14px;
+  color: white;
+}

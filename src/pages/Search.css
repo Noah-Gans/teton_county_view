@@ -1,0 +1,158 @@
+/* src/components/Search.css */
+.search-container {
+  position: absolute;
+  top: 40px; /* Adjust based on header */
+  left: 0;
+  width: 100%;
+  height: calc(100vh - 40px);
+  background: #e0c684; /* Opaque white background */
+  z-index: 10; /* High z-index to overlay on top of map */
+}
+  
+.search-tabs {
+  display: flex;
+  margin-bottom: 20px;
+  justify-content: center;
+}
+
+.search-tabs button {
+  flex: 1;
+  padding: 12px;
+  margin: 0 0px;
+  background-color: #f1f1f1;
+  border: 2px solid black;
+  border-top-right-radius: 10px;
+  border-top-left-radius: 10px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  font-size: 16px; /* Larger font size */
+}
+
+.search-tabs button.active {
+  background-color: #1d784f;
+  color: white;
+}
+
+.search-content {
+  align-items: center;
+  width: 100%;
+}
+
+.search-bar-button-container{
+
+  align-items: center;
+
+}
+/* Styling for the search input */
+.search-content input {
+  margin-left: 15%;
+  width: 50%; /* Adjust width to center the input bar */
+  padding: 12px 20px; /* Bigger padding for larger input */
+  border: 2px solid #1d784f; /* Match the active tab color */
+  border-radius: 30px; /* Rounded corners */
+  font-size: 18px; /* Larger font size for a more modern look */
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+
+.search-content input:focus {
+  border-color: #007bff; /* Change border color when focused */
+}
+
+.search-content button {
+  margin-top: 20px;
+  margin-left: 10%;
+  padding: 10px 20px;
+  background-color: #1d784f;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.search-content button:hover {
+  background-color: #006b45;
+}
+
+.search-results-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+  background-color: #e0c684;
+  width: 100%;
+}
+
+.search-result-item {
+  padding: 15px;
+  margin-left: 20%;
+  margin-right: 20%;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 10px; /* Rounded corners for modern look */
+}
+
+.search-result-item.even {
+  background-color: #f9f9f9; /* Light grey for even items */
+}
+
+.search-result-item.odd {
+  background-color: #cbcbcb; /* Slightly darker grey for odd items */
+}
+
+.search-result-item hr {
+  margin: 10px 0;
+  border: 0;
+  border-top: 1px solid #ddd;
+}
+
+.result-content {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+
+
+.result-buttons .map-button,
+.result-buttons .detail-button {
+  background-color: #0800ff; /* Color for map button */
+  color: white;
+  padding: 10px 20px; /* Ensure equal padding for consistent size */
+  font-size: 16px; /* Set a uniform font size */
+  text-align: center; /* Center text horizontally */
+  border-radius: 5px; /* Add some border-radius for better aesthetics */
+  width: 100%; /* Make the buttons take up the full width of their container */
+  box-sizing: border-box; /* Include padding in the width calculation */
+  text-decoration: none;
+}
+
+.result-buttons .map-button {
+  background-color: #0800ff;
+  color: white; /* Now it will correctly set the color to black */
+  margin-left: 0px;
+}
+
+.result-buttons .detail-button {
+  background-color: #28a745; /* Color for detail button */
+}
+
+.result-buttons {
+  display: flex;
+  flex-direction: column; /* Stack the buttons vertically */
+  justify-content: center; /* Center the buttons vertically within the parent */
+  align-items: center; /* Center the buttons horizontally */
+  gap: 10px; /* Space between the buttons */
+  height: 100%; /* Ensure the buttons fill the parent container's height */
+}
+
+/* Hover effects for both buttons */
+.result-buttons .map-button:hover,
+.result-buttons .detail-button:hover {
+  background-color: #ffc107; /* Highlight with yellow color on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow effect */
+  cursor: pointer; /* Change cursor to pointer on hover */
+}
