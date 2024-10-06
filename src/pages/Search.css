@@ -156,3 +156,11 @@
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow effect */
   cursor: pointer; /* Change cursor to pointer on hover */
 }
+
+
+.no-results {
+  text-align: center;
+  font-size: 24px;
+  color: black;
+  margin-top: 20px;
+}

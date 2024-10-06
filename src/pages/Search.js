@@ -8,34 +8,16 @@ const Search = ({ setSelectedFeature, onTabChange }) => {
   const [activeSearchTab, setActiveSearchTab] = useState('standard');
   const [searchResults, setSearchResults] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchTriggered, setIsSearchTriggered] = useState(false); // Track if search has been triggered
   const navigate = useNavigate();
-  const { rawOwnershipData, loading } = useContext(DataContext);  // Use raw data from context
+  const { transformedOwnershipData, loading } = useContext(DataContext);  // Use pre-transformed data
 
-  // This function is now responsible for transforming and searching
-  const transformAndSearch = (query, rawData) => {
+  // Function to search the transformed data
+  const searchTransformedData = (query, transformedData) => {
     const lowerCaseQuery = query.toLowerCase().trim();
 
-    return rawData.filter(feature => {
+    return transformedData.filter(feature => {
       const properties = feature.properties || {};
-      
-      // Only transform if needed
-      const descriptionHTML = properties.description || '';
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = descriptionHTML;
-      const rows = tempDiv.querySelectorAll('tr');
-      rows.forEach(row => {
-        const th = row.querySelector('th')?.textContent?.trim().toLowerCase();
-        const td = row.querySelector('td')?.textContent?.trim();
-
-        if (th && td) {
-          if (th === 'owner') properties.owner = td;
-          if (th === 'address') properties.address = td;
-          if (th === 'address2') properties.mailing_address = td; // Mailing address
-          if (th === 'pidn') properties.pidn = td;
-          if (th === 'accountno') properties.accountno = td;
-          if (th === 'tax_id') properties.tax_id = td;
-        }
-      });
 
       const owner = properties.owner?.toLowerCase().trim() || '';
       const address = properties.address?.toLowerCase().trim() || '';
@@ -43,9 +25,9 @@ const Search = ({ setSelectedFeature, onTabChange }) => {
       const tax_id = properties.tax_id?.toLowerCase().trim() || '';
 
       return (
-        owner.includes(lowerCaseQuery) || 
-        address.includes(lowerCaseQuery) || 
-        pidn.includes(lowerCaseQuery) || 
+        owner.includes(lowerCaseQuery) ||
+        address.includes(lowerCaseQuery) ||
+        pidn.includes(lowerCaseQuery) ||
         tax_id.includes(lowerCaseQuery)
       );
     });
@@ -53,7 +35,8 @@ const Search = ({ setSelectedFeature, onTabChange }) => {
 
   // Handle search input
   const handleSearch = () => {
-    const results = transformAndSearch(searchQuery, rawOwnershipData);  // Lazy transformation and search
+    setIsSearchTriggered(true); // Mark that search has been triggered
+    const results = searchTransformedData(searchQuery, transformedOwnershipData);  // Use transformed data for search
     setSearchResults(results);
   };
 
@@ -110,7 +93,10 @@ const Search = ({ setSelectedFeature, onTabChange }) => {
                 placeholder="Search by owner, address, PIDN..."
               />
               <button onClick={handleSearch}>Search</button>
-              </div>
+            </div>
+            {isSearchTriggered && searchResults.length === 0 && (
+              <div className="no-results">No results found.</div>
+            )}
             <ul className="search-results-list">
               {searchResults.map((result, index) => (
                 <li key={index} className={`search-result-item ${index % 2 === 0 ? 'even' : 'odd'}`}>

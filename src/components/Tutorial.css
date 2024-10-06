@@ -1,0 +1,77 @@
+/* The semi-transparent overlay */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Grey with transparency */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 20; /* High z-index to overlay on top of intro */
+  }
+  
+  /* The main tutorial popup box */
+  .tutorial-popup {
+    width: 60%;
+    height: 90%;
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    overflow-y: auto; /* Make the content scrollable */
+    position: relative;
+  }
+  
+  /* Floating back button at the top left */
+  .back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Tutorial content styling */
+  .tutorial-content {
+    margin-top: 60px; /* Space for the back button */
+  }
+  
+  .tutorial-content h1, .tutorial-content h2 {
+    margin-bottom: 15px;
+  }
+  
+  .tutorial-content p {
+    margin-bottom: 20px;
+  }
+
+
+  .step-image {
+    width: 100%;
+    height: auto;
+    border-radius: 10px;
+    margin-top: 15px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+  
+  .video-container {
+    width: 100%;
+    margin: 20px auto;
+  }
+  
+  .tutorial-video {
+    width: 100%;
+    border-radius: 10px;
+  }
+  

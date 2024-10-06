@@ -34,3 +34,51 @@
 .visible-map {
   display: block;
 }
+/* General container for the layer control */
+.leaflet-control-layers {
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Style the toggle button that opens the layer control */
+
+/* Styling for the base layers container (initially hidden) */
+.leaflet-control-layers-list {
+  display: none; /* Hidden by default */
+}
+
+/* Styling for individual base layer selection boxes */
+.base-layer-container {
+  width: 80px;
+  height: 60px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  margin-bottom: 5px;
+}
+
+/* Specific styles for different base layers */
+.base-layer-container.osm {
+  background-color: #f0f8ff;
+}
+
+.base-layer-container.satellite {
+  background-color: #e6e6e6;
+}
+
+.base-layer-container.blank {
+  background-color: #fafafa;
+}
+
+/* Style for the base layer names below the boxes */
+.leaflet-control-layers-base label span {
+  color: #000000;
+  font-weight: bold;
+  margin-top: 5px; /* Space between the box and the label text */
+  text-align: center;
+}
+

@@ -9,8 +9,8 @@ export const DataProvider = ({ children }) => {
   const [rawOwnershipData, setRawOwnershipData] = useState([]);  // For search functionality
   const [loadingOwnership, setLoadingOwnership] = useState(true);  // Track ownership loading separately
   const [loadingOtherLayers, setLoadingOtherLayers] = useState(true);  // Track other layers loading
-
-  // Define colors for different SURFACE types in Public Land layer
+  const [isTransformed, setIsTransformed] = useState(false); // Track if transformation has been completed  // Define colors for different SURFACE types in Public Land layer
+  const [transformedOwnershipData, setTransformedOwnershipData] = useState([]);
   const publicLandColors = {
     'Bureau of Land Management': 'yellow',
     'Fish & Wildlife Service': 'orange',
@@ -23,14 +23,6 @@ export const DataProvider = ({ children }) => {
     'Water': 'cyan',
   };
 
-  // Function to style public land features based on the SURFACE attribute
-  const stylePublicLand = (feature) => {
-    return {
-      color: publicLandColors[feature.properties.SURFACE] || 'gray',
-      weight: 2,
-      fillOpacity: 0.5
-    };
-  };
 
   const fetchOwnershipLayer = async () => {
     try {
@@ -95,8 +87,35 @@ export const DataProvider = ({ children }) => {
     }
   };
   
+  const transformOwnershipData = () => {
+    if (rawOwnershipData.length > 0) {
+      const transformedData = rawOwnershipData.map((feature) => {
+        const properties = feature.properties || {};
+        const descriptionHTML = properties.description || '';
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = descriptionHTML;
+        const rows = tempDiv.querySelectorAll('tr');
+        rows.forEach((row) => {
+          const th = row.querySelector('th')?.textContent?.trim().toLowerCase();
+          const td = row.querySelector('td')?.textContent?.trim();
   
-
+          if (th && td) {
+            if (th === 'owner') properties.owner = td;
+            if (th === 'address') properties.address = td;
+            if (th === 'address2') properties.mailing_address = td; // Mailing address
+            if (th === 'pidn') properties.pidn = td;
+            if (th === 'accountno') properties.accountno = td;
+            if (th === 'tax_id') properties.tax_id = td;
+          }
+        });
+  
+        return { ...feature, properties };
+      });
+  
+      // Store transformed data for search functionality
+      setTransformedOwnershipData(transformedData);
+    }
+  };
  /*
   // Function to fetch all GeoJSON files
   const fetchGeojsonFiles = async () => {
@@ -157,17 +176,28 @@ export const DataProvider = ({ children }) => {
   */
 
   // Fetch the data when the component mounts
-  useEffect(() => {
-    fetchOwnershipLayer();  // Load ownership layer first
 
-    // Once ownership is loaded, load the other layers
-    if (!loadingOwnership) {
+
+  useEffect(() => {
+    // Step 1: Load ownership layer
+    if (loadingOwnership) {
+      fetchOwnershipLayer();
+    }
+  
+    // Step 2: Load other layers once ownership is loaded
+    if (!loadingOwnership && loadingOtherLayers) {
       fetchOtherGeojsonFiles();
     }
-  }, [loadingOwnership]);
+  
+    // Step 3: Transform ownership data after all layers are loaded
+    if (!loadingOwnership && !loadingOtherLayers && !isTransformed) {
+      transformOwnershipData(); // Transform the data
+      setIsTransformed(true); // Mark as transformed to prevent repeated transformations
+    }
+  }, [loadingOwnership, loadingOtherLayers, isTransformed]);
 
   return (
-    <DataContext.Provider value={{ geojsonData, rawOwnershipData, loadingOwnership, loadingOtherLayers }}>
+    <DataContext.Provider value={{ geojsonData, rawOwnershipData, transformedOwnershipData, loadingOwnership, loadingOtherLayers }}>
       {children}
     </DataContext.Provider>
   );

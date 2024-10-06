@@ -6,18 +6,17 @@ const SidePanel = ({
   togglePanel,
   layers,
   handleLayerToggle,
+  layerStatus,       // <-- Added prop to get the layerStatus
+  setLayerStatus,    // <-- Added prop to update the layerStatus
   selectedFeatures,
   activeTab,
   setActiveTab,
   mapRef,
   highlightLayerRef,
 }) => {
-  const [layerStatus, setLayerStatus] = useState({
-    
-  });
   // States to manage expanded/collapsed sections
   const [isPlanningOpen, setIsPlanningOpen] = useState(false); // Minimized by default
-  const [isOwnershipOpen, setIsOwnershipOpen] = useState(true); // Ownership expanded
+  const [isOwnershipOpen, setIsOwnershipOpen] = useState(true); // Ownership expanded by default
   const [isPublicLandOpen, setIsPublicLandOpen] = useState(false);
   const [isPLSSOpen, setIsPLSSOpen] = useState(false);
   const [isRoadsOpen, setIsRoadsOpen] = useState(false);
@@ -27,33 +26,38 @@ const SidePanel = ({
   // State to manage legend visibility for each layer
   const [isLegendOpen, setIsLegendOpen] = useState({});
 
-  // State to manage selected layers
-
- // Track the layer visibility (ownership layer is visible by default)
-
-
   // Track selected layers for underline effect
   const [selectedLayers, setSelectedLayers] = useState(['ownership']); // Ownership selected by default
 
 
   const handleLayerSelection = (layerName) => {
+    console.log(`Layer selection toggled in SidePanel for: ${layerName}`);
+  
     const isLayerVisible = layerStatus[layerName];
-
-    // Toggle the layer visibility
-    setLayerStatus((prevStatus) => ({
-      ...prevStatus,
-      [layerName]: !prevStatus[layerName],
-    }));
-
-    // Update selectedLayers to manage the underline effect
-    if (isLayerVisible) {
-      setSelectedLayers((prevLayers) => prevLayers.filter((layer) => layer !== layerName)); // Remove layer
-    } else {
-      setSelectedLayers((prevLayers) => [...prevLayers, layerName]); // Add layer
-    }
-
-    handleLayerToggle(layerName); // Notify the Map to add/remove the layer
+    console.log(`Layer ${layerName} is currently ${isLayerVisible ? 'visible' : 'not visible'}. Toggling visibility.`);
+  
+    // Toggle the layer visibility in the shared state
+    setLayerStatus((prevStatus) => {
+      const updatedStatus = { ...prevStatus, [layerName]: !isLayerVisible };
+      console.log('Updated layerStatus:', updatedStatus);
+      return updatedStatus;
+    });
+  
+    // Update the selectedLayers stack
+    setSelectedLayers((prevLayers) => {
+      if (isLayerVisible) {
+        // If layer is currently visible and will be toggled off, remove it from the stack
+        return prevLayers.filter((layer) => layer !== layerName);
+      } else {
+        // If layer is being toggled on, add it to the top of the stack
+        return [...prevLayers, layerName];
+      }
+    });
+  
+    // Notify the Map component to toggle the actual layer on the map
+    handleLayerToggle(layerName);
   };
+  
 
   const topLayer = selectedLayers.length > 0 ? selectedLayers[selectedLayers.length - 1] : '';
 
@@ -120,18 +124,18 @@ const SidePanel = ({
       tojCorpLimit: 'Town Corp Limit',
       zoningOverlay: 'County Zoning Overlay',
       ownership: 'Ownership Parcels',
-      ownershipAddressLayer: 'Ownership Address',
+      ownershipAddress: 'Ownership Address',
       publicLand: 'Public Land',
       conservationEasements: 'Conservation Easements',
-      plssIntersectedLayer: 'PLSS Intersected',
-      plssLabelsLayer: 'PLSS Labels',
-      plssSectionsLayer: 'PLSS Sections',
-      plssTownshipsLayer: 'PLSS Townships',
-      roadsEasementsLayer: 'Roads Easements',
-      roadsLayer: 'Roads',
-      precinctsLayer: 'Precincts',
-      pollingCentersLayer: 'Polling Centers',
-      controlPointsLayer: 'Control Points',
+      plssIntersected: 'PLSS Intersected',
+      plssLabels: 'PLSS Labels',
+      plssSections: 'PLSS Sections',
+      plssTownships: 'PLSS Townships',
+      roadsEasements: 'Roads Easements',
+      roads: 'Roads',
+      precincts: 'Precincts',
+      pollingCenters: 'Polling Centers',
+      controlPoints: 'Control Points',
     };
     return layerNamesMap[layerName] || layerName;
   };
@@ -275,7 +279,7 @@ const SidePanel = ({
     <div><strong>Account#:</strong> {feature.accountno || 'N/A'}</div>
     <div><strong>Tax ID:</strong> {feature.tax_id || 'N/A'}</div>
     <div><strong>Owner:</strong> {feature.owner || 'N/A'}</div>
-    <div><strong>Mail Addr:</strong> {feature.address || 'N/A'}</div>
+    <strong>Mail Addr:</strong> {feature.address ? `${feature.address}, ${feature.owner_city}, ${feature.owner_state}` : 'N/A'}
     <div><strong>Tax Classification:</strong> {feature.accttype || 'N/A'}</div>
     <div><strong>Deed:</strong> {feature.deed || 'N/A'}</div>
     <div><strong>Area (Tax):</strong> {feature.area_tax ? `${feature.area_tax} acres` : 'N/A'}</div>

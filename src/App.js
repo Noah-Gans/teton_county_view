@@ -1,76 +1,46 @@
-import React, { useState, useRef } from 'react';
-import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import React, { useState } from 'react';
+import { HashRouter as Router, Route, Routes } from 'react-router-dom';
 import Intro from './pages/Intro';
 import Map from './pages/Mapy';
 import Search from './pages/Search';
-import { DataProvider } from './assets/DataContext';  // Ensure correct import of DataContext
+import { DataProvider } from './assets/DataContext';
 import Print from './pages/Print';
 import MainHeader from './pages/MainHeader';
+import './App.css';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('intro');  // Set default to 'intro'
+  const [activeTab, setActiveTab] = useState('intro');  // Default to 'intro'
   const [selectedFeature, setSelectedFeature] = useState(null);
-  const mapRef = useRef(null);
-  const [isMapLoading, setIsMapLoading] = useState(false); // Track map loading state
-  const [hasMapStartedLoading, setHasMapStartedLoading] = useState(false); // Track if map has started loading
-
-  const handleMapButtonClick = () => {
-    setActiveTab('map');
-    setHasMapStartedLoading(true); // Set the map to start loading
-    setIsMapLoading(true); // Set map loading state to true
-    
-    // Simulate map loading delay
-    setTimeout(() => {
-      setIsMapLoading(false); // Set map loading to false once "loaded"
-    }, 2000); // Simulate a 2-second delay, adjust as needed
-
-    // Navigate to the map by changing window location
-    window.location.href = '/map';
-  };
+  const [layerStatus, setLayerStatus] = useState({});  // Shared state for layer visibility
 
   return (
-    <DataProvider> {/* Wrap your app with DataProvider to make context available globally */}
+    <DataProvider>
       <Router>
-        <MainHeader activeTab={activeTab} onTabChange={setActiveTab} />
+        <div className="app-container">
+          <MainHeader activeTab={activeTab} onTabChange={setActiveTab} />
 
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <Intro
-                isMapLoading={isMapLoading}
-                onStartClick={handleMapButtonClick} // Pass down map button click handler
+          {/* Always render the map, so it stays in the background */}
+          <div className="map-container">
+            <Map
+              selectedFeature={selectedFeature}
+              setSelectedFeature={setSelectedFeature}
+              layerStatus={layerStatus} // Pass layer status to the map
+              setLayerStatus={setLayerStatus} // Pass function to set layer status
+            />
+          </div>
+
+          {/* Components that overlay the map */}
+          <div className="overlay-container">
+            <Routes>
+              <Route path="/" element={<Intro onStartClick={() => setActiveTab('map')} />} />
+              <Route
+                path="/search"
+                element={<Search setSelectedFeature={setSelectedFeature} onTabChange={setActiveTab} />}
               />
-            }
-          />
-          <Route
-            path="/map"
-            element={
-              <>
-                {hasMapStartedLoading && isMapLoading ? (
-                  <div className="spinner">Loading Map...</div> // Show spinner while map is loading
-                ) : (
-                  <Map
-                    ref={mapRef}
-                    selectedFeature={selectedFeature}
-                    setSelectedFeature={setSelectedFeature}
-                    isVisible={activeTab === 'map'} // Control visibility of the map component
-                  />
-                )}
-              </>
-            }
-          />
-          <Route
-            path="/search"
-            element={
-              <Search
-                setSelectedFeature={setSelectedFeature}
-                onTabChange={setActiveTab} // Pass onTabChange to Search for tab switching
-              />
-            }
-          />
-          <Route path="/print" element={<Print />} />
-        </Routes>
+              <Route path="/print" element={<Print />} />
+            </Routes>
+          </div>
+        </div>
       </Router>
     </DataProvider>
   );

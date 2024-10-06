@@ -179,6 +179,7 @@ const getPublicLandStyle = (feature) => {
 
   // Export function to get style based on layer
   export const getLayerStyle = (layerName, feature) => {
+    console.log(layerName);
     if (layerName === 'ownership') {
       return { color: 'gray', weight: 1, fillOpacity: 0 };
     }
@@ -200,8 +201,11 @@ const getPublicLandStyle = (feature) => {
         return getPublicLandStyle(feature);  // Use the mapping function for public land
     }
     if (layerName == 'tojCorpLimit'){
-        return { color: 'orange', weight: 2, fillOpacity: 0 };
+        return { color: 'blue', weight: 3, fillOpacity: 0 };
     }
+    if (layerName == 'conservationEasements'){
+      return { color: 'green', weight: 3, fillOpacity: .75 };
+  }
     return { color: 'gray', weight: 1, fillOpacity: 0 };
   };
   

@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';  // Import useState and useEffect
 import { Link } from 'react-router-dom';
 import './MainHeader.css';
 
 const MainHeader = ({ activeTab, onTabChange }) => {
   const [localActiveTab, setLocalActiveTab] = useState(activeTab);
   const [updateTime, setUpdateTime] = useState(''); // State to hold the update time
+
   useEffect(() => {
     setLocalActiveTab(activeTab); // Sync local tab state with parent prop
   }, [activeTab]);
@@ -53,9 +54,12 @@ const MainHeader = ({ activeTab, onTabChange }) => {
       >
         Print
       </Link>
-      
-      <div className="update-time">
-        <span>{updateTime ? updateTime : 'Fetching...'}</span>
+
+      <div className="update-time-contact">
+      <span className="update-time">{updateTime ? updateTime : 'Fetching...'}</span>
+        <a href="mailto:tetoncountyview@gmail.com" className="contact-link">
+          Contact
+        </a>
       </div>
     </div>
   );
