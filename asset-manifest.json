@@ -1,15 +1,17 @@
 {
   "files": {
-    "main.css": "/teton_county_view/static/css/main.18a2ba49.css",
-    "main.js": "/teton_county_view/static/js/main.e6aeefe6.js",
+    "main.css": "/teton_county_view/static/css/main.e451e555.css",
+    "main.js": "/teton_county_view/static/js/main.1571fa51.js",
+    "static/media/tutorial.png": "/teton_county_view/static/media/tutorial.b17a3d6c54ae5f0011a7.png",
+    "static/media/Map with annotations.jpg": "/teton_county_view/static/media/Map with annotations.5a8b1dd6b567cf3a5911.jpg",
     "static/media/spritesheet.svg": "/teton_county_view/static/media/spritesheet.a4e0eb7ad904a4858361.svg",
-    "static/media/test.svg": "/teton_county_view/static/media/test.abd372ccc3af1b96b9e9bb881e891ce2.svg",
+    "static/media/test.svg": "/teton_county_view/static/media/test.ee3fa304e1972d6de210964e25a78ec8.svg",
     "index.html": "/teton_county_view/index.html",
-    "main.18a2ba49.css.map": "/teton_county_view/static/css/main.18a2ba49.css.map",
-    "main.e6aeefe6.js.map": "/teton_county_view/static/js/main.e6aeefe6.js.map"
+    "main.e451e555.css.map": "/teton_county_view/static/css/main.e451e555.css.map",
+    "main.1571fa51.js.map": "/teton_county_view/static/js/main.1571fa51.js.map"
   },
   "entrypoints": [
-    "static/css/main.18a2ba49.css",
-    "static/js/main.e6aeefe6.js"
+    "static/css/main.e451e555.css",
+    "static/js/main.1571fa51.js"
   ]
 }
