@@ -74,4 +74,15 @@
     width: 100%;
     border-radius: 10px;
   }
+  .image-spacing {
+    margin-right: 20px; /* Adjust the value as needed */
+  }
+  .section-divider {
+    margin: 40px 0; /* Add vertical spacing above and below the line */
+    border: 0;
+    border-top: 2px solid #ccc; /* Light gray line with a little thickness */
+  }
   
+  h2 {
+    margin-top: 20px; /* Additional spacing above the heading for better readability */
+  }

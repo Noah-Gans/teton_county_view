@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';  // Import useState and useEffect
 import { Link } from 'react-router-dom';
 import './MainHeader.css';
+import ContactForm from '../components/ContactForm';
 
 const MainHeader = ({ activeTab, onTabChange }) => {
   const [localActiveTab, setLocalActiveTab] = useState(activeTab);
   const [updateTime, setUpdateTime] = useState(''); // State to hold the update time
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false); // State to manage contact form visibility
 
   useEffect(() => {
     setLocalActiveTab(activeTab); // Sync local tab state with parent prop
@@ -14,6 +16,14 @@ const MainHeader = ({ activeTab, onTabChange }) => {
     setLocalActiveTab(tab);
     onTabChange(tab);
   };
+  const handleContactClick = () => {
+    setIsContactFormOpen(true); // Open contact form
+  };
+
+  const handleCloseContactForm = () => {
+    setIsContactFormOpen(false); // Close contact form
+  };
+
 
   useEffect(() => {
     const fetchUpdateTime = async () => {
@@ -57,10 +67,14 @@ const MainHeader = ({ activeTab, onTabChange }) => {
 
       <div className="update-time-contact">
       <span className="update-time">{updateTime ? updateTime : 'Fetching...'}</span>
-        <a href="mailto:tetoncountyview@gmail.com" className="contact-link">
+      <button className="contact-link" onClick={handleContactClick}>
           Contact
-        </a>
+        </button>
+        <Link to="/" className="home-link">
+          Home
+        </Link>
       </div>
+      {isContactFormOpen && <ContactForm onClose={handleCloseContactForm} />}
     </div>
   );
 };

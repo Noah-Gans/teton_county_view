@@ -40,7 +40,7 @@
   margin: auto;
   display: flex;
   align-items: center;
-  gap: 50px; /* Spacing between update time and contact button */
+  gap: 20px; /* Spacing between update time and contact button */
 }
 
 .update-time {
@@ -61,6 +61,21 @@
 }
 
 .contact-link:hover {
+  background-color: #1d784f;
+  color: #fff;
+}
+.home-link {
+  font-size: 14px;
+  color: #1d784f;
+  text-decoration: none;
+  padding: 7px 5px;
+  border: 1px solid white;
+  background-color: white;
+  border-radius: 5px;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.home-link:hover {
   background-color: #1d784f;
   color: #fff;
 }

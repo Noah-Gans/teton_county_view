@@ -18,6 +18,7 @@
 .intro-title {
   margin-top: 5%;
   font-size: 2em;
+  z-index: 2;
 }
 
 .svg-container {
@@ -27,6 +28,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.static-image-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%; /* Adjust as needed */
+  height: auto; /* Maintain aspect ratio */
+  margin-bottom: 20px; /* Space below the image */
+}
+
+.static-image {
+
+  width: 100%; /* Adjust to fit the container */
+  max-width: 600px; /* Set a max width if needed */
+  height: auto; /* Maintain aspect ratio */
 }
 
 .explore-button {
@@ -111,6 +128,47 @@
   margin-right: 5%; /* Add half the gap on the right */
   margin-left: 10%; /* Add half the gap on the left */
 }
+.notes-description{
+
+  margin-bottom: 3%;
+}
+.notes-scroll-box {
+  flex-grow: 1; /* Allow the scroll box to take up remaining space */
+  overflow-y: auto; /* Enable vertical scrolling */
+  border: 1px solid #ccc; /* Optional border for visual separation */
+  padding: 10px;
+  border-radius: 10px;
+  margin-top: 1px;
+  background-color: #f9f9f9; /* Light background for better readability */
+  max-height: 63%; /* Adjust this value to fit your layout requirements */
+}
+
+.divider {
+  margin: 20px 0;
+  border: none;
+  border-top: 1px solid #ccc; /* Optional: make dividers consistent */
+}
+
+.bookmark-guide-button,
+.tutorial-button,
+.share-button {
+  display: block;
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  background-color: #1d784f; /* Example color */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.bookmark-guide-button:hover,
+.tutorial-button:hover,
+.share-button:hover {
+  background-color: #145336; /* Darker shade for hover effect */
+}
 
 .updates {
   margin-left: 5%; /* Add half the gap on the left */
@@ -130,7 +188,7 @@
 
 /* Scrollable box for updates inside the updates container */
 .updates-scroll-box {
-  height: 85%; /* Set desired height for the scroll box */
+  height: 80%; /* Set desired height for the scroll box */
   overflow-y: auto; /* Enable vertical scrolling */
   border: 1px solid #ccc; /* Optional border for visual separation */
   padding: 10px;
@@ -141,10 +199,13 @@
 /* Individual update item */
 .update-item {
   padding-bottom: 20px; /* Padding below each item */
+  align-content: left;
+
 }
 
 /* Styling for the header of each update item */
 .update-item h3 {
+  align-content: left;
   margin-bottom: 10px;
   font-size: 1.1em;
   font-weight: bold;
@@ -152,6 +213,7 @@
 
 /* Styling for the paragraph of each update item */
 .update-item p {
+  align-self: left;
   margin: 0;
   line-height: 1.5;
 }
@@ -226,6 +288,40 @@
 
 .contact-button:hover {
   transform: scale(1.05);
+}
+
+.bookmark-guide-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.bookmark-guide-container {
+  background: #fff;
+  padding: 30px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 600px;
+  position: relative;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.close-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
 }
 
 /* Animation for SVG paths */
