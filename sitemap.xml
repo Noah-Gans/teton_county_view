@@ -32,16 +32,17 @@
     <priority>0.3</priority>
   </url>
 
+  <!-- Updates page -->
   <url>
-    <loc>http://tetoncountygis.com/updates</loc>
+    <loc>https://www.tetoncountygis.com/updates</loc>
     <lastmod>2024-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
   </url>
- 
 
+  <!-- Tutorial page -->
   <url>
-    <loc> http://tetoncountygis.com/tutorial</loc>
+    <loc>https://www.tetoncountygis.com/tutorial</loc>
     <lastmod>2024-10-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.5</priority>
