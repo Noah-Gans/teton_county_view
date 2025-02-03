@@ -1,0 +1,6 @@
+{
+  "stripe": {
+    "webhook_secret": "whsec_8Dymd07R3NgZ3PMxphhDp55kgru2DHEg",
+    "secret": "sk_test_51QjmlpLhg9Kp46ldVTDiY8HjXSB0xGN45QTGQfuAoFgn9cZgEIEa9TEwaVI9hqL5XqotTVRwIrM0lccgbn5C5QDW009FTgM7Om"
+  }
+}

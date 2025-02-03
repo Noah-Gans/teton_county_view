@@ -2,6 +2,7 @@
 .tool-panel {
   width: fit-content;
   display: flex;
+  top: 40px; /* Set the vertical offset from the top */
   height: 50px;
   margin: auto;
   align-items: center;
@@ -11,9 +12,8 @@
   backdrop-filter: blur(3px); /* Apply a blur effect to the background */
   border-bottom-left-radius: 10px; /* Rounded bottom-left corner */
   border-bottom-right-radius: 10px; /* Rounded bottom-right corner */
-  border-bottom: 2px solid black;
-  border-left: 2px solid black;
-  border-right: 2px solid black;
+  border-radius: 10px;
+  border: 2px solid black;
   z-index: 10;
   position: relative;
 }

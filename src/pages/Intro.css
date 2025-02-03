@@ -6,8 +6,9 @@
   left: 0;
   width: 100%;
   height: 100vh;
-  background: white; /* Opaque white background */
-  z-index: 10; /* High z-index to overlay on top of map */
+  background-color: rgba(255, 255, 255, 0.782); /* Whitish-gray background with some transparency */
+  backdrop-filter: blur(5px);
+  z-index: 15; /* High z-index to overlay on top of map */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,284 +46,180 @@
   max-width: 600px; /* Set a max width if needed */
   height: auto; /* Maintain aspect ratio */
 }
+/* Container for the chevron layout */
+.chevron-button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 30px;
+  position: relative;
+}
 
+/* Center the explore button */
 .explore-button {
-  padding: 15px 30px;
-  font-size: 20px;
-  color: #000;
-  background-color: #e0e0e000;
-  text-decoration: none;
-  border-radius: 10px;
-  border: 2px solid #000;
-  transition: background-color 0.3s, transform 0.2s;
-  cursor: pointer;
+  margin-bottom: 20px;
+  margin: auto;
 }
 
-.explore-button:hover {
-  background-color: #28a745;
-  color: white;
-  transform: scale(1.05);
+/* Chevron-style positioning */
+.row {
+  display: flex;
+  justify-content: space-between; /* Space between buttons on the same row */
+  position: relative;
+  margin-top: 30px; /* Space between rows */
 }
 
-.information-updates {
-  font-size: 24px;  /* Adjust the size to your preference */
-  font-weight: bold; /* Make the text bold (optional) */
-  text-align: center; /* Center the text */
-  margin-top: 30vh; /* Set the top margin to 90% of the viewport height */
-  margin-bottom: 0; /* Ensure there's no unwanted bottom margin */
-}
-.arrow-container {
-  text-align: center;
-  margin-top: 0px;
+/* Narrow row for middle buttons (Updates and Contact) */
+.narrow-row {
+  width: 50%; /* Adjusted width for chevron layout */
+  display: flex;
+  justify-content: space-between;
+  margin-left: 300px; /* Increase left and right margin for larger spacing */
+  margin-right: 300px;
 }
 
-.arrow-svg {
-  padding-top: 0px;
-  width: 100px;
-  height: 85px;
+/* Wide row for bottom buttons (Tutorial and Share) */
+.wide-row {
+  width: 65%; /* Adjusted width for chevron layout */
+  display: flex;
+  justify-content: space-between;
+  margin-left: 400px; /* Increase left and right margin for larger spacing */
+  margin-right: 400px;
+}
+/* Variables converted to static values */
+:root {
+  --color: #c0392b;
+  --color-dark: #a53125;
+  --speed: 0.25s;
+  --transition: all var(--speed) cubic-bezier(0.310, -0.105, 0.430, 1.400);
+}
+
+/* Main Styles */
+.button {
   display: block;
-  stroke: #000; /* Arrow color */
-  stroke-width: 3;
-  fill: none;
-  margin-bottom: 0px;
-
+  background-color: transparent;
+  width: 150px; /* Adjusted button size */
+  height: 60px;
+  line-height: 60px;
+  margin: 0 10px; /* Space between buttons */
+  color: black;
+  text-align: center;
+  border-radius: 5px;
+  transition: var(--transition);
+  cursor: pointer;
+  position: relative;
+  cursor: pointer;
+  overflow: hidden;
+  border-radius: 5px;
+  padding: 20px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.3);
+  
+  transition: var(--transition);
 }
 
-/* Animation for Mountain SVG paths */
-.animated-svg path {
-  stroke: #000; /* Set the stroke color of the lines */
-  stroke-width: 2; /* Line thickness */
-  fill: none; /* Ensure that there's no fill, only a stroke */
-  stroke-dasharray: 1000; /* Set a high dash length to initially hide the path */
-  stroke-dashoffset: 1000; /* Initially hide the entire line */
-  animation: draw 4s ease-in-out forwards; /* Apply the draw animation */
+.button span,
+.button .icon {
+  display: block;
+  height: 100%;
+  text-align: center;
+  position: absolute;
+  top: 0;
 }
 
-/* Define the animation keyframes for the mountain SVG */
-@keyframes draw {
-  to {
-    stroke-dashoffset: 0; /* Reveal the entire line */
+.button span {
+  width: 72%;
+  padding-right: 10px;
+  line-height: inherit;
+  font-size: 22px;
+  text-transform: uppercase;
+  left: 0;
+  transition: var(--transition);
+  position: relative;
+}
+
+.button span:after {
+  content: '';
+  background-color: var(--color-dark);
+  width: 2px;
+  height: 70%;
+  position: absolute;
+  top: 15%;
+  right: -1px;
+}
+
+.button .icon {
+  width: 28%;
+  right: 0;
+  transition: var(--transition);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button .icon-caret {
+  font-size: 30px;
+  vertical-align: middle;
+  transition: var(--transition), height var(--speed) ease;
+}
+
+.button .icon-caret {
+  height: 100%;
+}
+.button .icon {
+  font-style: normal; /* Prevent italicization */
+}
+
+
+
+
+
+.button.success,
+.button:hover {
+  background-color: rgba(255, 255, 255, 0);
+  span {
+    left: -72%;
+    opacity: 0;
+  }
+
+  .icon {
+    width: 100%;
+  }
+
+  .icon-caret,
+  .icon-asterisk {
+    font-size: 45px;
   }
 }
 
-.bottom-section {
-  margin-top: 0px;
-  width: 100%;
-  height: 1000px;
-  display: flex;
-  flex-direction: column; /* Stack elements vertically */
-  align-items: center;
-  padding-bottom: 20px; /* Add some padding at the bottom */
+/* Hover Styles for Individual Buttons */
+.explore-button:hover {
+  background-color: #2ecc71; /* Red on hover */
+  opacity: 0.9;
 }
 
-.tutorial-updates-container {
-  display: flex;
-  height: 60vh;
-  justify-content: space-between;
-  align-items: flex-start;
-  width: 100%;
-  margin-bottom: 20px; /* Add spacing between the tutorial-updates section and the contact section */
-}
-
-.tutorial {
-  margin-right: 5%; /* Add half the gap on the right */
-  margin-left: 10%; /* Add half the gap on the left */
-}
-.notes-description{
-
-  margin-bottom: 3%;
-}
-.notes-scroll-box {
-  flex-grow: 1; /* Allow the scroll box to take up remaining space */
-  overflow-y: auto; /* Enable vertical scrolling */
-  border: 1px solid #ccc; /* Optional border for visual separation */
-  padding: 10px;
-  border-radius: 10px;
-  margin-top: 1px;
-  background-color: #f9f9f9; /* Light background for better readability */
-  max-height: 63%; /* Adjust this value to fit your layout requirements */
-}
-
-.divider {
-  margin: 20px 0;
-  border: none;
-  border-top: 1px solid #ccc; /* Optional: make dividers consistent */
-}
-
-.bookmark-guide-button,
-.tutorial-button,
-.share-button {
-  display: block;
-  width: 100%;
-  padding: 12px;
-  margin: 10px 0;
-  background-color: #1d784f; /* Example color */
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.bookmark-guide-button:hover,
-.tutorial-button:hover,
-.share-button:hover {
-  background-color: #145336; /* Darker shade for hover effect */
-}
-
-.updates {
-  margin-left: 5%; /* Add half the gap on the left */
-  margin-right: 10%; /* Add half the gap on the right */
-  padding: 20px;
-}
-
-.tutorial, .updates {
-  width: 45%;
-  height: 60vh;
-  padding: 15px;
-  border: 2px solid #000;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  text-align: center;
-}
-
-/* Scrollable box for updates inside the updates container */
-.updates-scroll-box {
-  height: 80%; /* Set desired height for the scroll box */
-  overflow-y: auto; /* Enable vertical scrolling */
-  border: 1px solid #ccc; /* Optional border for visual separation */
-  padding: 10px;
-  border-radius: 8px;
-  background-color: #f9f9f9; /* Light background for better readability */
-}
-
-/* Individual update item */
-.update-item {
-  padding-bottom: 20px; /* Padding below each item */
-  align-content: left;
-
-}
-
-/* Styling for the header of each update item */
-.update-item h3 {
-  align-content: left;
-  margin-bottom: 10px;
-  font-size: 1.1em;
-  font-weight: bold;
-}
-
-/* Styling for the paragraph of each update item */
-.update-item p {
-  align-self: left;
-  margin: 0;
-  line-height: 1.5;
-}
-
-/* Horizontal line between each update item */
-.update-divider {
-  margin: 20px 0; /* Vertical space around the divider */
-  border: none; /* Remove default border style */
-  border-top: 1px solid #000; /* Create a thin horizontal line */
-}
-
-.tutorial h2, .updates h2 {
-  margin-bottom: 15px;
-  font-size: 1.2em;
-}
-.tutorial-button {
-  display: inline-block;
-  padding: 10px 20px;
-  font-size: 18px;
-  color: #fff;
-  background-color: #28a745;
-  text-decoration: none;
-  border-radius: 5px;
-  margin-top: 10px;
-  transition: background-color 0.3s;
-}
-
-.tutorial-button:hover {
-  background-color: #218838;
-}
-.tutorial-image {
-  height: auto; /* Or adjust as needed */
-  background-color: #f0f0f0;
-  border-radius: 10px;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  overflow: hidden; /* Ensures the image doesn't overflow the container */
-}
-
-.tutorial-img {
-  max-width: 100%; /* Make sure the image scales with the container */
-  height: auto;    /* Maintain aspect ratio */
-}
-
-
-
-.contact-section {
-  text-align: center;
-  width: 100%;
-  margin-top: 20px;
-}
-
-.contact-section p {
-  font-size: large;
-  font-weight: bold;
-  margin-bottom: 10px;
-}
-
-.contact-button {
-  padding: 15px 30px;
-  font-size: 20px;
-  color: #000;
-  background-color: #e0e0e000;
-  text-decoration: none;
-  border-radius: 10px;
-  border: 2px solid #000;
-  transition: background-color 0.3s, transform 0.2s;
-  cursor: pointer;
+.updates-button:hover {
+  background-color: #3498db; /* Blue on hover */
+  opacity: 0.9;
 }
 
 .contact-button:hover {
-  transform: scale(1.05);
+  background-color: #f39c12; /* Orange on hover */
+  opacity: 0.9;
 }
 
-.bookmark-guide-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
+.tutorial-button:hover {
+  background-color: #9b59b6; /* Purple on hover */
+  opacity: 0.9;
 }
 
-.bookmark-guide-container {
-  background: #fff;
-  padding: 30px;
-  border-radius: 10px;
-  width: 80%;
-  max-width: 600px;
-  position: relative;
-  max-height: 90vh;
-  overflow-y: auto;
+.share-button:hover {
+  background-color: #e61aca; /* Green on hover */
+  opacity: 0.9;
 }
 
-.close-button {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  background: none;
-  border: none;
-  font-size: 20px;
-  cursor: pointer;
-}
+
 
 /* Animation for SVG paths */
 .animated-svg path {

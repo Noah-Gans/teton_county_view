@@ -1,30 +1,34 @@
-/* The semi-transparent overlay */
-.tutorial-overlay {
-    position: fixed;
+/* General page styles */
+.tutorial-page {
+    position: absolute;
     top: 0;
     left: 0;
     width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.5); /* Grey with transparency */
+    height: 100vh;
+    background-color: white; /* Full white background */
+    z-index: 1000; /* Ensure it's on top */
     display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 20; /* High z-index to overlay on top of intro */
+    justify-content: center; /* Centers content horizontally */
+    align-items: center; /* Centers content vertically */
+    padding: 0;
+    overflow: hidden; /* Disable overflow on the main page */
   }
   
-  /* The main tutorial popup box */
-  .tutorial-popup {
-    width: 60%;
-    height: 90%;
-    background: white;
-    border-radius: 10px;
+  /* Scrollable content inside the tutorial */
+  .tutorial-content-container {
+    width: 67%; /* 67% width of the screen */
+    height: 90%; /* Set a fixed height */
+    overflow-y: auto; /* Enable vertical scrolling */
     padding: 20px;
+    background-color: white;
+    border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
-    overflow-y: auto; /* Make the content scrollable */
-    position: relative;
   }
   
-  /* Floating back button at the top left */
+  .tutorial-content {
+    margin-top: 60px; /* Space for the back button */
+  }
+  
   .back-button {
     position: absolute;
     top: 20px;
@@ -43,20 +47,6 @@
     background-color: #0056b3;
   }
   
-  /* Tutorial content styling */
-  .tutorial-content {
-    margin-top: 60px; /* Space for the back button */
-  }
-  
-  .tutorial-content h1, .tutorial-content h2 {
-    margin-bottom: 15px;
-  }
-  
-  .tutorial-content p {
-    margin-bottom: 20px;
-  }
-
-
   .step-image {
     width: 100%;
     height: auto;
@@ -65,24 +55,19 @@
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
   
-  .video-container {
-    width: 100%;
-    margin: 20px auto;
-  }
-  
-  .tutorial-video {
-    width: 100%;
-    border-radius: 10px;
-  }
-  .image-spacing {
-    margin-right: 20px; /* Adjust the value as needed */
-  }
   .section-divider {
-    margin: 40px 0; /* Add vertical spacing above and below the line */
+    margin: 40px 0;
     border: 0;
-    border-top: 2px solid #ccc; /* Light gray line with a little thickness */
+    border-top: 2px solid #ccc;
   }
   
-  h2 {
-    margin-top: 20px; /* Additional spacing above the heading for better readability */
+  h1, h2 {
+    text-align: center; /* Center h1 and h2 headers */
+    align-self: center;
+    margin-top: 20px;
   }
+  
+  .image-spacing {
+    margin-right: 20px;
+  }
+  

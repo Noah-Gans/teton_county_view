@@ -90,6 +90,20 @@ const countyZoningColors = {
     'Water': 'cyan',
     'default': 'gray',  // Default color for unknown surface type
   };
+
+  const roadColors = {
+    'US': '#FF0000',   // Bright Red for type US Highway
+    'WY': '#0000FF',   // Bright Blue Wy Highway/Road
+    'CO': '#FFA500',   // Bright Orange for County
+    'CM': '#FFA500',   // Bright Orange for County
+    'NP': '#FFFF00',   // Bright Yellow for type NP
+    'np': '#FFFF00',   // Bright Yellow for type np (same as NP)
+    'FS': '#32CD32',   // Bright Magenta for type FS
+    'ID': '#FF69B4',   // Bright Red for type ID (Other State)
+    'MT': '#FF69B4',   // Bright Pink for type MT (Other State)
+                      // Bright Gold for type WY
+  };
+  
   // Function to get the style for County zoning layer
   const getCountyZoningStyle = (feature) => {
     const parsedProperties = parseDescription(feature.properties.description);
@@ -119,10 +133,41 @@ const countyZoningColors = {
   
     return {
       color,
-      weight: 2,
+      weight: 3,
       fillOpacity: 0.4,
     };
   };
+
+  const getRoadStyle = (feature) => {
+    const parsedProperties = parseDescription(feature.properties.description);
+    const type = parsedProperties.type
+    const color = roadColors[type] || '#b29869';  // Use brownish color as default
+    
+    // Define width (weight) based on road type
+    const roadWeight = (type) => {
+      switch (type) {
+        case 'US':
+          return 5;   // US Highway
+        case 'WY':
+          return 4;   // Wyoming Highway/Road
+        case 'CO':
+        case 'CM':
+        case 'NP':
+        case 'np':
+        case 'FS':
+          return 3;   // County, NP, FS
+        default:
+          return 2;   // Other roads
+      }
+    };
+  
+    return {
+      color: color,
+      weight: roadWeight(type),  // Set weight based on road type
+      opacity: 1
+    };
+  };
+
   
   // Function to get the style for TOJ zoning layer
   const getZoningStyle = (feature) => {
@@ -161,6 +206,9 @@ const countyZoningColors = {
 
 
 const getPublicLandStyle = (feature) => {
+    console.log("Cat Cat\n\n\n\n\n\n")
+    console.log(feature)
+    console.log(feature.properties.SURFACE)
     const surfaceType = feature.properties.SURFACE;
     const color = publicLandColors[surfaceType] || publicLandColors['default'];
   
@@ -180,8 +228,9 @@ const getPublicLandStyle = (feature) => {
   // Export function to get style based on layer
   export const getLayerStyle = (layerName, feature) => {
     console.log(layerName);
+    console.log("CAAAAAAT")
     if (layerName === 'ownership') {
-      return { color: 'gray', weight: 1, fillOpacity: 0 };
+      return { color: 'Grey', weight: .5, fillOpacity: 0 };
     }
   
     if (layerName === 'tojZoning') {
@@ -197,12 +246,16 @@ const getPublicLandStyle = (feature) => {
     if (layerName === 'zoningOverlay') {
     return getCountyZoningOverlayStyle(feature);  // Call the function for TOJ Zoning Overlay
     }
-    if (layerName === 'publicLand') {
+    if (layerName === 'public_land') {
         return getPublicLandStyle(feature);  // Use the mapping function for public land
     }
     if (layerName == 'tojCorpLimit'){
         return { color: 'blue', weight: 3, fillOpacity: 0 };
     }
+    if (layerName == 'roads'){
+      return getRoadStyle(feature);
+  }
+    
     if (layerName == 'conservationEasements'){
       return { color: 'green', weight: 3, fillOpacity: .75 };
   }

@@ -1,0 +1,61 @@
+.signup-page {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100vh;
+    z-index: 9999;
+    display: flex;
+    background-color: #ffffff;
+  }
+  .signup-left, .signup-right {
+    flex: 1;
+    padding: 40px;
+  }
+  .signup-left {
+    background: #f2f5f9;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  .signup-right {
+    background: #fff;
+    position: relative;
+  }
+  .close-button {
+    position: absolute;
+    top: 20px; 
+    right: 20px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  .primary-button {
+    background: #006b45;
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    padding: 12px 20px;
+    cursor: pointer;
+  }
+  /* Already have .signup-page, .signup-left, .signup-right, .close-button, .primary-button from your example */
+
+.signup-step {
+    margin-bottom: 2rem;
+    transition: filter 0.4s ease, opacity 0.4s ease;
+  }
+  
+  /* When the step is "completed" we can blur it a bit. 
+     The logic is in the JS: if step > currentStep => add .blurred */
+  .blurred {
+    filter: blur(3px);
+    opacity: 0.6;
+    pointer-events: none; /* disallow clicks on old steps */
+  }
+  
+  .active-step {
+    /* we can highlight it if we want, e.g. a border or something: */
+    border-left: 4px solid #006b45;
+    padding-left: 10px;
+  }
+  

@@ -21,7 +21,6 @@
   transform: translateX(100%);
 }
 label {
-  border-bottom: 2px solid black;
 }
 
 .legend {

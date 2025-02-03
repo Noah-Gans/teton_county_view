@@ -5,13 +5,22 @@ import tutorialImage from '../assets/images/tutorial.png';
 import staticImage from '../assets/images/static image.jpg'; // Import the static image for Safari
 import Tutorial from '../components/Tutorial';
 import ContactForm from '../components/ContactForm';
+import SharePopup from '../components/SharePopup';  // Import the new SharePopup
+import { useMapContext } from '../pages/MapContext';
+import { getFunctions, httpsCallable } from "firebase/functions";
+import { getApp } from "firebase/app"; // or initializeApp(...) if not done yet
+
 
 const Intro = ({ onStartClick }) => {
   const navigate = useNavigate();
+  const { activeTab, setActiveTab } = useMapContext();
   const [isTutorialOpen, setIsTutorialOpen] = useState(false);
   const [isSafari, setIsSafari] = useState(false);
   const [isContactOpen, setIsContactOpen] = useState(false);
   const [isBookmarkGuideOpen, setIsBookmarkGuideOpen] = useState(false);
+  const [isClicked, setIsClicked] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);  // New state for the share popup
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     // Check if the browser is Safari
     const userAgent = navigator.userAgent.toLowerCase();
@@ -19,10 +28,7 @@ const Intro = ({ onStartClick }) => {
     setIsSafari(safari);
   }, []);
 
-  const handleStartClick = () => {
-    onStartClick(); // Trigger tab change to map
-    navigate('/map'); // Navigate to the map page
-  };
+  
 
   const handleTutorialClick = () => {
     setIsTutorialOpen(true); // Open the tutorial popup
@@ -49,6 +55,90 @@ const Intro = ({ onStartClick }) => {
     setIsBookmarkGuideOpen(false);
   };
 
+  const handleOpenShare = () => {
+    setIsShareOpen(true);
+  };
+
+  // Close the share popup
+  const handleCloseShare = () => {
+    setIsShareOpen(false);
+  };
+
+  const handleShareClick = () => {
+    if (navigator.share) {
+      navigator.share({
+        title: 'Teton County GIS',
+        text: 'Check out this amazing spatial data platform: Teton County GIS!',
+        url: 'https://www.tetoncountygis.com',
+      })
+      .then(() => console.log('Share successful!'))
+      .catch((error) => console.log('Sharing failed:', error));
+    } else {
+      // Fallback for browsers that don't support the Web Share API
+      alert('Your browser does not support sharing. Please copy and share the link manually.');
+    }
+  };
+  
+
+const removeSuccess = () => {
+  const button = document.querySelector('.button');
+  if (button) {
+    button.classList.remove('success');
+    setTimeout(removeSuccess, 3000); // Remove success state after 3 seconds
+  }
+};
+
+// Function that handles button click
+const handleStartClick = (e) => {
+  e.preventDefault(); // Prevent the anchor's default action
+
+  const button = document.querySelector('.button');
+  if (button) {
+    button.classList.add('success');
+
+    // Set a timeout to remove the 'success' class after 3 seconds
+    setTimeout(removeSuccess, 3000);
+
+    // Navigate to the map page after a short delay for animation
+    setTimeout(() => {
+      navigate('/map');
+    }, 300); // Adjust the timing as necessary
+  }
+};
+const createCheckoutSession = httpsCallable(
+  getFunctions(getApp()), 
+  "createCheckoutSession"
+);
+
+const handleStripeCheckout = async () => {
+  setLoading(true);
+  try {
+    // Call the function with the needed data
+    const result = await createCheckoutSession({
+      email: "user@example.com",
+      userId: "USER_ID",
+    });
+    // result.data should contain { url: session.url }
+    const { url } = result.data;
+    window.location.href = url;
+  } catch (error) {
+    console.error("Error calling onCall function:", error);
+    alert("Something went wrong. Please try again.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelector('.button').addEventListener('click', function() {
+    this.classList.add('success');
+    setTimeout(removeSuccess, 3000); // Remove success state after 3 seconds
+  });
+});
+  
   useEffect(() => {
     if (!isSafari) {
       // Animate SVG paths if not Safari
@@ -64,7 +154,10 @@ const Intro = ({ onStartClick }) => {
 
   return (
     <div className="intro">
-      <h1 className="intro-title">Teton County, Wyoming Community View</h1>
+      <h1 className="intro-title">The Better Teton County, Wyoming GIS Hub</h1>
+      <h2>Contact Us for Teton County GIS Support</h2>
+
+      
       <div className="svg-container">
         {isSafari ? (
           // Render as a static image if Safari
@@ -88,86 +181,60 @@ const Intro = ({ onStartClick }) => {
           </svg>
         )}
       </div>
-      <button onClick={handleStartClick} className="explore-button">
-        Explore
-      </button>
-      <p className="information-updates">Information & Updates</p>
-      <div className="arrow-container">
-        {/* Arrow SVG as an inline SVG */}
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 100 100"
-          width="20"
-          className="arrow-svg"
-        >
-          <path d="M50 0 L50 85 M50 85 L30 65 M50 85 L70 65" stroke="#000" strokeWidth="5" fill="none" />
-        </svg>
-      </div>
-      <div className="bottom-section">
-        <div className="tutorial-updates-container">
-          <div className="tutorial">
-            <h2 className="notes-title">Notes from the Creator</h2>
-              <p className="notes-description">
-                Hey everyone, thank you for visiting Teton County View! I created this platform to make spatial data more accessible. Let me know if you enjoy or have any suggestions.
-              </p>
-              <div className="notes-scroll-box">
-                <div className="bookmark-section">
-                  <h2>Please Bookmark This Page</h2>
-                  <p className="bookmark-message">
-                    This page is hard to find through Google search because of how new it is. Please bookmark it using the guide below so it's easy to find.
-                  </p>
-                  <button onClick={handleOpenBookmarkGuide} className="bookmark-guide-button">
-                    Bookmark Guide
-                  </button>
-                </div>
-                <hr className="divider" />
-                <div className="tutorial-section">
-                  <h2>Click for a Quick Tutorial</h2>
-                  <button onClick={handleTutorialClick} className="tutorial-button">
-                    How to Use
-                  </button>
-                </div>
-                <hr className="divider" />
-                <div className="share-section">
-                  <button className="share-button">
-                    Share This Website
-                  </button>
-                </div>
-              </div>
-            </div>
-          <div className="updates">
-            <h2>Development Dashboard</h2>
-            <div className="updates-scroll-box">
-              <div className="update-item">
-                <h3>Teton Community View 1.0 Release</h3>
-                <h3>2024-10-06</h3>
-                <p>Hey everyone, thanks for coming and using this hopefully better service than the county GIS. I made becase of all the frustration I heard around the counties platform. It's not perfect but it's a work in progress. I hope to continue to improve it if people are using it! So, come back here for more updates and plans and please contact me with commnets using the button below. Thanks and enjoy! </p>
-              </div>
-              <hr className="update-divider" />
-              <div className="update-item">
-                <h3>Future Development: Community Feedback</h3>
-                <p>We're working on adding more community features to better engage with Teton residents.</p>
-              </div>
-              <hr className="update-divider" />
-              <div className="update-item">
-                <h3>Mapping Enhancements</h3>
-                <p>Upcoming improvements include better aerial imagery and additional map layers for analysis.</p>
-              </div>
-              <hr className="update-divider" />
-              <div className="update-item">
-                <h3>Mapping Enhancements</h3>
-                <p>Upcoming improvements include better aerial imagery and additional map layers for analysis.</p>
-              </div>
-            </div>
+      
+      <div className="chevron-button-container">
+      <a
+        className="button explore-button"
+        onClick={() => {
+          onStartClick();
+          setActiveTab("map");
+          navigate("/map");
+        }}
+        role="button"
+      >
+          <span>Explore</span>
+          <div className="icon">
+            <i className="icon-caret">🗺️</i>
+            
           </div>
+        </a>
+
+        <div className="row narrow-row">
+          <a className="button updates-button" onClick={() => navigate('/updates')} role="button">
+            <span>Updates</span>
+            <div className="icon">
+              <i className="icon-caret">📨</i>
+              
+            </div>
+          </a>
+          <a className="button contact-button" onClick={handleOpenContact} role="button">
+            <span>Contact</span>
+            <div className="icon">
+              <i className="icon-caret">📞</i>
+              
+            </div>
+          </a>
         </div>
-        <div className="contact-section">
-          <p>
-            This is a service for the people. If you have ideas, frustrations, or notice something is not working, please contact me below!
-          </p>
-          <button onClick={handleOpenContact} className="contact-button">Contact</button>
+
+        <div className="row wide-row">
+          <a className="button tutorial-button" onClick={() => navigate('/tutorial')} role="button">
+            <span>Tutorial</span>
+            <div className="icon">
+              <i className="icon-caret">🤔</i>
+             
+            </div>
+          </a>
+          <a className="button share-button" onClick={handleOpenShare} role="button">
+            <span>Share</span>
+            <div className="icon">
+              <i className="icon-caret">🗣️</i>
+            </div>
+          </a>
         </div>
       </div>
+
+      
+      
       {isBookmarkGuideOpen && (
         <div className="bookmark-guide-overlay">
           <div className="bookmark-guide-container">
@@ -216,6 +283,7 @@ const Intro = ({ onStartClick }) => {
       
       {isTutorialOpen && <Tutorial onClose={handleCloseTutorial} />}
       {isContactOpen && <ContactForm onClose={handleCloseContact} />}
+      {isShareOpen && <SharePopup onClose={handleCloseShare} />}  {/* Add the share popup */}
     </div>
   );
 };

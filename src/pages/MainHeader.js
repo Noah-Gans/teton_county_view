@@ -1,80 +1,62 @@
-import React, { useState, useEffect } from 'react';  // Import useState and useEffect
-import { Link } from 'react-router-dom';
-import './MainHeader.css';
-import ContactForm from '../components/ContactForm';
+import React, { useState } from "react";
+import { Link } from "react-router-dom";
+import "./MainHeader.css";
+import ContactForm from "../components/ContactForm";
+import { useMapContext } from "./MapContext";
+import { useUser } from "../contexts/UserContext";
 
-const MainHeader = ({ activeTab, onTabChange }) => {
-  const [localActiveTab, setLocalActiveTab] = useState(activeTab);
-  const [updateTime, setUpdateTime] = useState(''); // State to hold the update time
-  const [isContactFormOpen, setIsContactFormOpen] = useState(false); // State to manage contact form visibility
-
-  useEffect(() => {
-    setLocalActiveTab(activeTab); // Sync local tab state with parent prop
-  }, [activeTab]);
+const MainHeader = () => {
+  const [isContactFormOpen, setIsContactFormOpen] = useState(false);
+  const { activeTab, setActiveTab } = useMapContext();
+  const { user, logout } = useUser(); // Access user state and logout function from UserContext
 
   const handleTabChange = (tab) => {
-    setLocalActiveTab(tab);
-    onTabChange(tab);
+    setActiveTab(tab);
   };
+
   const handleContactClick = () => {
-    setIsContactFormOpen(true); // Open contact form
+    setIsContactFormOpen(true);
   };
 
   const handleCloseContactForm = () => {
-    setIsContactFormOpen(false); // Close contact form
+    setIsContactFormOpen(false);
   };
-
-
-  useEffect(() => {
-    const fetchUpdateTime = async () => {
-      try {
-        const response = await fetch(
-          'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/update_time.txt'
-        );
-        const text = await response.text();
-        setUpdateTime(text.trim()); // Set the fetched time in the state
-      } catch (error) {
-        console.error('Error fetching update time:', error);
-      }
-    };
-
-    fetchUpdateTime(); // Fetch the update time on component mount
-  }, []);
 
   return (
     <div className="main-header">
+      {/* Navigation Tabs */}
       <Link
-        className={`header-tab ${localActiveTab === 'map' ? 'active' : ''}`}
-        onClick={() => handleTabChange('map')}
+        className={`header-tab ${activeTab === "map" ? "active" : ""}`}
+        onClick={() => handleTabChange("map")}
         to="/map"
       >
         Map
       </Link>
       <Link
-        className={`header-tab ${localActiveTab === 'search' ? 'active' : ''}`}
-        onClick={() => handleTabChange('search')}
+        className={`header-tab ${activeTab === "search" ? "active" : ""}`}
+        onClick={() => handleTabChange("search")}
         to="/search"
       >
         Search
       </Link>
       <Link
-        className={`header-tab ${localActiveTab === 'print' ? 'active' : ''}`}
-        onClick={() => handleTabChange('print')}
+        className={`header-tab ${activeTab === "print" ? "active" : ""}`}
+        onClick={() => handleTabChange("print")}
         to="/print"
       >
         Print
       </Link>
+      <Link
+        className={`header-tab ${activeTab === "home" ? "active" : ""}`}
+        onClick={() => handleTabChange("home")}
+        to="/"
+      >
+        Home
+      </Link>
 
-      <div className="update-time-contact">
-      <span className="update-time">{updateTime ? updateTime : 'Fetching...'}</span>
-      <button className="contact-link" onClick={handleContactClick}>
-          Contact
-        </button>
-        <Link to="/" className="home-link">
-          Home
-        </Link>
-      </div>
-      {isContactFormOpen && <ContactForm onClose={handleCloseContactForm} />}
+      
+
+      
     </div>
   );
 };

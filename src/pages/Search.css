@@ -1,12 +1,22 @@
 /* src/components/Search.css */
 .search-container {
+  
   position: absolute;
-  top: 40px; /* Adjust based on header */
+  top: 32px; /* Adjust based on header */
   left: 0;
-  width: 100%;
-  height: calc(100vh - 40px);
+  width: 99%;
+  display: flex;
+
+  height: calc(100vh - 50px);
   background: #e0c684; /* Opaque white background */
   z-index: 10; /* High z-index to overlay on top of map */
+  background-color: rgba(255, 255, 255, 0.6); /* Whitish-gray background with some transparency */
+  backdrop-filter: blur(3px);
+  border: solid black;
+  border-radius: 10px;
+  margin-left: .25%;
+  margin-top: .5%;
+  flex-direction: column; /* Ensure children are stacked vertically */
 }
   
 .search-tabs {
@@ -36,64 +46,153 @@
 .search-content {
   align-items: center;
   width: 100%;
+  max-height: 100%; /* Take up full height of parent container */
 }
 
-.search-bar-button-container{
+/* Container for Search Bar and Buttons */
+.search-bar-and-actions-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; /* Center align everything */
+  margin-bottom: 0px; /* Add space below the container */
+  border-bottom: solid black;
+  border-radius: 7px;
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  padding:5px;
 
-  align-items: center;
-
+  background-color: #006b45;
+  z-index: 10;
+  gap:5px
 }
+
+.search-bar {
+  display: flex;
+  justify-content: center; /* Center-align the search bar */
+  gap: 10px; /* Add spacing between input and button */
+  margin-bottom: 10px; /* Space between search bar and action buttons */
+  width: 40%;
+}
+.search-bar-button-container {
+  padding: 20px;
+  gap: 20px;
+  display: flex; /* Ensures the input and button align horizontally */
+  border-bottom: solid black;
+  background-color: #006b45;
+  gap: 10px; /* Adjust the spacing between the elements */
+  align-items: center; /* Vertically align input and button */
+  justify-content: center; /* Center the container */
+}
+
 /* Styling for the search input */
 .search-content input {
-  margin-left: 15%;
-  width: 50%; /* Adjust width to center the input bar */
-  padding: 12px 20px; /* Bigger padding for larger input */
-  border: 2px solid #1d784f; /* Match the active tab color */
-  border-radius: 30px; /* Rounded corners */
-  font-size: 18px; /* Larger font size for a more modern look */
+  margin: 0; /* Remove left margin */
+  width: 50%; /* Keep the width of the input centered */
+  padding: 12px 20px;
+  border: 2px solid #1d784f;
+  border-radius: 30px;
+  border: solid black 2px;
+  font-size: 18px;
   outline: none;
   transition: border-color 0.3s ease;
 }
 
 .search-content input:focus {
-  border-color: #007bff; /* Change border color when focused */
+  border-color: #007bff;
 }
 
+/* Styling for the search button */
 .search-content button {
-  margin-top: 20px;
-  margin-left: 10%;
-  padding: 10px 20px;
-  background-color: #1d784f;
+  margin-left: 10px; /* Remove top and left margin */
+  margin-right: 10px;
+  padding: 12px 20px; /* Adjust padding for better sizing */
+  background-color: #9d7715;
+  
   color: white;
-  border: none;
   border-radius: 20px;
   cursor: pointer;
   font-size: 16px;
   transition: background-color 0.3s ease;
+  border: solid black 2px;
+
 }
 
 .search-content button:hover {
   background-color: #006b45;
 }
 
+.search-results-container {
+  
+  flex-grow: 1; /* Allow the container to grow within available space */
+  max-height: calc(79vh); /* Dynamically calculate height */
+  overflow-y: auto; /* Enable vertical scrolling */
+  
+  margin-left: auto;
+  margin-right: auto;
+  padding: 10px; /* Inner padding for better layout */
+  border-radius: 8px; /* Optional: rounded corners */
+  background-color: #006b4600; /* Optional: background color */
+  width: 60%;
+  
+}
+
+/* Optional scrollbar styling for a polished look */
+.search-results-container::-webkit-scrollbar {
+  width: 8px;
+}
+
+.search-results-container::-webkit-scrollbar-thumb {
+  background-color: #aaa; /* Custom scrollbar color */
+  border-radius: 4px;
+}
+
+.search-results-container::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
+}
+
+/* Top blur effect */
+.blur-effect-top,
+.blur-effect-bottom {
+  position: sticky;
+  height: 30px; /* Adjust the height of the blur effect */
+  width: 100%;
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.6); /* Whitish-gray background with some transparency */
+  backdrop-filter: blur(3px); /* Apply blur effect */
+}
+
+/* Top blur sticks to the top */
+.blur-effect-top {
+  top: 0;
+}
+
+/* Bottom blur sticks to the bottom */
+.blur-effect-bottom {
+  bottom: 0;
+}
+
+
+
 .search-results-list {
   list-style-type: none;
   padding: 0;
   margin: 20px 0;
-  background-color: #e0c684;
   width: 100%;
 }
 
 .search-result-item {
   padding: 15px;
-  margin-left: 20%;
-  margin-right: 20%;
+  margin-left: 2%;
+  margin-right: 2%;
   margin-bottom: 10px;
   border: 1px solid #ddd;
   display: flex;
   justify-content: space-between;
   align-items: center;
   border-radius: 10px; /* Rounded corners for modern look */
+  border: solid black;
+  height: 100px;
+
 }
 
 .search-result-item.even {
@@ -105,7 +204,7 @@
 }
 
 .search-result-item hr {
-  margin: 10px 0;
+
   border: 0;
   border-top: 1px solid #ddd;
 }
@@ -116,45 +215,70 @@
   width: 100%;
 }
 
+.result-buttons-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns */
+  row-gap: 0; /* Remove any gap between rows */
+  column-gap: 5px; /* Space between buttons horizontally */
+  width: 100px;  /* Adjust width so it doesn't overflow */
+  height: 120px; /* Adjust height based on your button size */
+  align-items: stretch; /* Ensure buttons stretch to fill available space */
+  justify-items: center; /* Center the buttons horizontally */
+  margin-top: 2%; /* Move grid upwards */
+  margin-right: 60px; /* Move grid to the left */
+}
 
-.result-buttons .map-button,
-.result-buttons .detail-button {
-  background-color: #0800ff; /* Color for map button */
-  color: white;
-  padding: 10px 20px; /* Ensure equal padding for consistent size */
-  font-size: 16px; /* Set a uniform font size */
-  text-align: center; /* Center text horizontally */
-  border-radius: 5px; /* Add some border-radius for better aesthetics */
-  width: 100%; /* Make the buttons take up the full width of their container */
-  box-sizing: border-box; /* Include padding in the width calculation */
+.result-buttons-grid a, .result-buttons-grid button {
+  border: solid black;
+  font-size: 14px;
+  width: 100%; /* Make buttons fill the grid cell */
+  height: 75%; /* Ensure the buttons fully fill the grid rows */
+  text-align: center;
   text-decoration: none;
+  background-color: #007bff;
+  color: white;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  border: 2px solid #7a7a7a; /* Add a subtle border */}
+
+  .result-buttons-grid a:hover, .result-buttons-grid button:hover {
+    background-color: #0056b3;
+    border-color: #0056b3; /* Change border color on hover */
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Make shadow larger on hover */
+  }
+
+.result-buttons-grid .tax-button {
+  background-color: #28a745;
 }
 
-.result-buttons .map-button {
-  background-color: #0800ff;
-  color: white; /* Now it will correctly set the color to black */
-  margin-left: 0px;
+.result-buttons-grid .tax-button:hover {
+  background-color: #218838;
 }
 
-.result-buttons .detail-button {
-  background-color: #28a745; /* Color for detail button */
+.result-buttons-grid .clerk-button {
+  background-color: #6f42c1;
 }
 
-.result-buttons {
-  display: flex;
-  flex-direction: column; /* Stack the buttons vertically */
-  justify-content: center; /* Center the buttons vertically within the parent */
-  align-items: center; /* Center the buttons horizontally */
-  gap: 10px; /* Space between the buttons */
-  height: 100%; /* Ensure the buttons fill the parent container's height */
+.result-buttons-grid .clerk-button:hover {
+  background-color: #593196;
 }
 
-/* Hover effects for both buttons */
-.result-buttons .map-button:hover,
-.result-buttons .detail-button:hover {
-  background-color: #ffc107; /* Highlight with yellow color on hover */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a subtle shadow effect */
-  cursor: pointer; /* Change cursor to pointer on hover */
+.result-buttons-grid .map-button {
+  background-color: #17a2b8;
+}
+
+.result-buttons-grid .map-button:hover {
+  background-color: #138496;
+}
+
+.result-buttons-grid .detail-button {
+  background-color: #ffc107;
+}
+
+.result-buttons-grid .detail-button:hover {
+  background-color: #e0a800;
 }
 
 

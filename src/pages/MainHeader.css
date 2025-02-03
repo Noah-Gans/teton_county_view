@@ -1,14 +1,16 @@
 /* src/components/MainHeader.css */
 .main-header {
   display: flex;
-  background-color: black;
-  border-bottom: 2px solid black;
+  width: 100%;
+  position: absolute; /* Position the header above the map */
+  z-index: 11;
   height: 40px;
 }
 
 
-.header-tab {
-  margin-top: auto;
+.header-tab,
+.contact-link {
+  margin-top: 3px;
   gap: 10px;
   margin-left: 10px;
   height: 30px;
@@ -22,60 +24,60 @@
   display: flex;
   align-items: center; /* Center text vertically */
   justify-content: center; /* Center text horizontally */
-  border-top-left-radius: 5px; /* Round top-left corner */
-  border-top-right-radius: 5px; /* Round top-right corner */
-  border-top: solid black 2px;
-  border-left: solid black 2px;
-  border-right: solid black 2px;
+  border-radius: 5px;
+  border: solid black 2px;
 
 }
 
+.header-tab:hover {
+  background-color: #006b45; /* Same as active color */
+  color: white;
+  border-color: #333; /* Optional: Darker border on hover */
+}
 
 .header-tab.active {
   background-color: #9d7715;
   color: white;
 }
 
-.update-time-contact {
-  margin: auto;
+/* Align the login button to the far right */
+.auth-section {
+  margin-left: auto; /* Push the login button to the right */
   display: flex;
   align-items: center;
-  gap: 20px; /* Spacing between update time and contact button */
+}/* Ensure the login/sign-in button is always on top */
+.auth-button {
+  z-index: 9999; /* Ensure it's above everything else */
+  position: relative; /* Needed to anchor the dropdown to this button */
 }
 
-.update-time {
-  font-size: 14px;
-  color: white;
-}
-
-
-.contact-link {
-  font-size: 14px;
-  color: #1d784f;
-  text-decoration: none;
-  padding: 7px 5px;
-  border: 1px solid white;
-  background-color: white;
+/* Dropdown menu styling */
+.auth-dropdown {
+  position: absolute; /* Position relative to the button */
+  top: 40px; /* Adjust to appear below the button */
+  right: 0; /* Align dropdown to the right */
+  background-color: white; /* Background color for the dropdown */
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
   border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
+  z-index: 9999; /* Ensure it's above everything else */
+  width: 200px; /* Adjust width */
+  padding: 10px;
 }
 
-.contact-link:hover {
-  background-color: #1d784f;
-  color: #fff;
-}
-.home-link {
-  font-size: 14px;
-  color: #1d784f;
-  text-decoration: none;
-  padding: 7px 5px;
-  border: 1px solid white;
-  background-color: white;
-  border-radius: 5px;
-  transition: background-color 0.3s, color 0.3s;
+/* Dropdown menu items */
+.auth-dropdown-item {
+  padding: 8px 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: background-color 0.3s;
 }
 
-.home-link:hover {
-  background-color: #1d784f;
-  color: #fff;
+.auth-dropdown-item:hover {
+  background-color: #f1f1f1;
 }
+
+/* Hide dropdown by default */
+.auth-dropdown.hidden {
+  display: none;
+}
+

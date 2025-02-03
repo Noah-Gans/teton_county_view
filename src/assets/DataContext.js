@@ -9,8 +9,11 @@ export const DataProvider = ({ children }) => {
   const [rawOwnershipData, setRawOwnershipData] = useState([]);  // For search functionality
   const [loadingOwnership, setLoadingOwnership] = useState(true);  // Track ownership loading separately
   const [loadingOtherLayers, setLoadingOtherLayers] = useState(true);  // Track other layers loading
+  const [loadingReport, setLoadingReport] = useState(true); // Track report data loading
   const [isTransformed, setIsTransformed] = useState(false); // Track if transformation has been completed  // Define colors for different SURFACE types in Public Land layer
   const [transformedOwnershipData, setTransformedOwnershipData] = useState([]);
+  const [mapFocusFeature, setMapFocusFeature] = useState(null);
+  const [reportData, setReportData] = useState(''); // State to store the report data
   const publicLandColors = {
     'Bureau of Land Management': 'yellow',
     'Fish & Wildlife Service': 'orange',
@@ -24,7 +27,7 @@ export const DataProvider = ({ children }) => {
   };
 
 
-  const fetchOwnershipLayer = async () => {
+  const fetchOwnershipLayer1 = async () => {
     try {
       const ownershipUrl = 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/ownership.geojson_ownership.geojson';
       const response = await fetch(ownershipUrl);
@@ -39,53 +42,43 @@ export const DataProvider = ({ children }) => {
     }
   };
 
-  const fetchOtherGeojsonFiles = async () => {
-    const files = {
-      conservationEasements: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/conservation_easements.geojson_conservation_easements.geojson',
-      controlPoints: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/control_points.geojson',
-      ownershipAddress: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/ownership.geojson_address.geojson',
-      plssIntersected: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/plss.geojson_plss_intersected.geojson',
-      plssLabels: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/plss.geojson_plss_labels.geojson',
-      plssSections: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/plss.geojson_plss_sections.geojson',
-      plssTownships: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/plss.geojson_plss_townships.geojson',
-      pollingCenters: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/precincts.geojson_polling_centers.geojson',
-      precincts: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/precincts.geojson_precincts.geojson',
-      roadsEasements: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/roads.geojson_easements.geojson',
-      roads: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/roads.geojson_roads.geojson',
-      tojCorpLimit: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/zoning.geojson_toj_corp_limit.geojson',
-      tojZoning: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/zoning.geojson_toj_zoning.geojson',
-      tojZoningOverlay: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/zoning.geojson_toj_zoning_overlay.geojson',
-      zoning: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/zoning.geojson_zoning.geojson',
-      zoningOverlay: 'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/files/zoning.geojson_zoverlay.geojson',
-      publicLand:       'https://raw.githubusercontent.com/Noah-Gans/teton_gis_database/main/public land.geojson'      // Fixed space issue
-    };
-  
+  const fetchOwnershipLayer = async () => {
     try {
-      const dataPromises = Object.entries(files).map(async ([layerName, url]) => {
-        const response = await fetch(url);
-        if (!response.ok) {
-          console.error(`Failed to load ${layerName}:`, response.statusText);
-          return null;
-        }
-        const geojson = await response.json();
-        console.log(`Successfully loaded ${layerName}:`, geojson); // Log successful loading
-        return { [layerName]: geojson };
-      });
+      const ownershipUrl = 'https://storage.googleapis.com/first_bucket_store/test/stripeed_file';
+      const response = await fetch(ownershipUrl);
   
-      const geojsonResponses = await Promise.all(dataPromises);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch stripped ownership GeoJSON: ${response.status}`);
+      }
   
-      // Filter out any null values in case any layer failed to load
-      const validGeojsonResponses = geojsonResponses.filter(response => response !== null);
+      const ownershipData = await response.json();
   
-      const data = validGeojsonResponses.reduce((acc, curr) => ({ ...acc, ...curr }), {});
-  
-      setGeojsonData(prevData => ({ ...prevData, ...data }));
+      setGeojsonData(prevData => ({ ...prevData, ownership: ownershipData }));
+      setRawOwnershipData(ownershipData.features || []); // Store the raw ownership data for search
     } catch (error) {
-      console.error('Error fetching other GeoJSON files:', error);
+      console.error('Error fetching stripped ownership GeoJSON file:', error);
     } finally {
-      setLoadingOtherLayers(false);  // All other layers are loaded
+      setLoadingOwnership(false); // Ownership data is loaded
     }
   };
+
+    // Fetch report data
+    const fetchReportData = async () => {
+      try {
+        const reportUrl = 'https://storage.googleapis.com/first_bucket_store/report/updated_merged_output_clerkyyy.txt';
+        const response = await fetch(reportUrl);
+        if (!response.ok) {
+          throw new Error(`Failed to fetch report data: ${response.status}`);
+        }
+        const text = await response.text();
+        setReportData(text);
+      } catch (error) {
+        console.error('Error fetching report data:', error);
+        setReportData('Error loading report data.');
+      } finally {
+        setLoadingReport(false); // Report data is loaded
+      }
+    };
   
   const transformOwnershipData = () => {
     if (rawOwnershipData.length > 0) {
@@ -183,21 +176,21 @@ export const DataProvider = ({ children }) => {
     if (loadingOwnership) {
       fetchOwnershipLayer();
     }
-  
-    // Step 2: Load other layers once ownership is loaded
-    if (!loadingOwnership && loadingOtherLayers) {
-      fetchOtherGeojsonFiles();
-    }
-  
+    
     // Step 3: Transform ownership data after all layers are loaded
-    if (!loadingOwnership && !loadingOtherLayers && !isTransformed) {
+    if (!loadingOwnership && !isTransformed) {
       transformOwnershipData(); // Transform the data
       setIsTransformed(true); // Mark as transformed to prevent repeated transformations
     }
-  }, [loadingOwnership, loadingOtherLayers, isTransformed]);
+
+    if (loadingReport) {
+      fetchReportData();
+    }
+  
+  }, [loadingOwnership, isTransformed, loadingReport]);
 
   return (
-    <DataContext.Provider value={{ geojsonData, rawOwnershipData, transformedOwnershipData, loadingOwnership, loadingOtherLayers }}>
+    <DataContext.Provider value={{ geojsonData, rawOwnershipData, transformedOwnershipData, loadingOwnership, reportData, loadingOtherLayers, mapFocusFeature, setMapFocusFeature }}>
       {children}
     </DataContext.Provider>
   );

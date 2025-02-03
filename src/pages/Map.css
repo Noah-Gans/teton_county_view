@@ -1,9 +1,23 @@
 /* src/Map.css */
 .map-container {
   position: relative;
-  height: calc(100vh - 50px);
+  height: 100%;
   width: 100%;
   overflow: hidden;
+}
+.mapboxgl-ctrl-top-left {
+  display: none;
+}
+
+.basemap-switcher {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 9;
+  background: white;
+  padding: 5px;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 #map {
@@ -48,37 +62,124 @@
   display: none; /* Hidden by default */
 }
 
-/* Styling for individual base layer selection boxes */
-.base-layer-container {
-  width: 80px;
-  height: 60px;
+
+.layer-selector-container {
+  position: absolute;
+  bottom: 20px;
+  left: 20px; /* Ensure it's well inside the map container */
+  z-index: 10; /* Keep it above all other elements */
+  pointer-events: auto;
+}
+
+.layer-selector-button {
+  width: 50px;
+  height: 50px;
+  border: none;
   border-radius: 8px;
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  position: relative;
+}
+
+.layer-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.layer-selector-popup {
+  display: none;
+  position: absolute;
+  bottom: 60px; /* Prevents overlap with the button */
+  left: 0;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  padding: 10px;
+  width: 150px;
+  pointer-events: auto;
+}
+
+.layer-selector-popup button {
+  width: 100%;
+  padding: 10px;
+  border: none;
+  background-color: transparent;
+  text-align: left;
   cursor: pointer;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
-  margin-bottom: 5px;
+  font-size: 14px;
+}
+.layer-selector-container {
+  padding-bottom: 10px; /* Ensures hover covers the gap */
 }
 
-/* Specific styles for different base layers */
-.base-layer-container.osm {
-  background-color: #f0f8ff;
+.layer-selector-popup button:hover {
+  background-color: #f0f0f0;
 }
 
-.base-layer-container.satellite {
-  background-color: #e6e6e6;
+.layer-selector-container:hover .layer-selector-popup {
+  display: block;
 }
 
-.base-layer-container.blank {
-  background-color: #fafafa;
+.map-container {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
 }
 
-/* Style for the base layer names below the boxes */
-.leaflet-control-layers-base label span {
-  color: #000000;
-  font-weight: bold;
-  margin-top: 5px; /* Space between the box and the label text */
-  text-align: center;
+#map {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
 }
 
+
+/* The overlay covers the entire .map-container */
+.map-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  /* A semi-transparent dark background */
+  background-color: rgba(0, 0, 0, 0.6); 
+  z-index: 10;
+  /* center the content */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  /* Ensures pointer events are captured by the overlay, 
+     blocking clicks on the map behind it. */
+  pointer-events: auto; 
+  color: #fff; /* text color */
+}
+
+.overlay-title {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.overlay-text {
+  margin-bottom: 1rem;
+}
+
+.overlay-button {
+  background-color: #006b45;
+  color: #fff;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.overlay-button:hover {
+  background-color: #005236;
+}
