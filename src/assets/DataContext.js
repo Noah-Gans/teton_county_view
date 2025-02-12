@@ -65,7 +65,7 @@ export const DataProvider = ({ children }) => {
     // Fetch report data
     const fetchReportData = async () => {
       try {
-        const reportUrl = 'https://storage.googleapis.com/first_bucket_store/report/updated_merged_output_clerkyyy.txt';
+        const reportUrl = 'https://storage.googleapis.com/first_bucket_store/report/updated_report_2.txt';
         const response = await fetch(reportUrl);
         if (!response.ok) {
           throw new Error(`Failed to fetch report data: ${response.status}`);

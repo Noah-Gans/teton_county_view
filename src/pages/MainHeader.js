@@ -44,7 +44,7 @@ const MainHeader = () => {
         onClick={() => handleTabChange("print")}
         to="/print"
       >
-        Print
+        Reports
       </Link>
       <Link
         className={`header-tab ${activeTab === "home" ? "active" : ""}`}

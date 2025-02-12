@@ -194,6 +194,61 @@
   height: 100px;
 
 }
+/* Ensure consistent checkbox size and alignment */
+.result-checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100px;
+  margin-right: 5%;
+}
+
+/* Increase checkbox size */
+.result-checkbox input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  cursor: pointer;
+  border: 2px solid #1d784f; /* Green border */
+  border-radius: 4px; /* Rounded checkbox */
+  background-color: white; /* Default background */
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Style checkbox when checked */
+.result-checkbox input[type="checkbox"]:checked {
+  background-color: #1d784f; /* Green background */
+  border-color: #1d784f; /* Green border */
+  position: relative;
+}
+
+/* Add checkmark */
+.result-checkbox input[type="checkbox"]::after {
+  content: "✔"; /* Checkmark */
+  font-size: 18px;
+  line-height: 14px;
+  color: red;
+  display: block;
+  text-align: center;
+  position: absolute;
+  left: 25%;
+  top: 25%;
+  font-weight: bold;
+}
+
+/* Checkbox hover effect */
+.result-checkbox input[type="checkbox"]:hover {
+  border-color: #138b6a; /* Slightly darker green on hover */
+}
+
+/* Checkbox focus (for keyboard navigation) */
+.result-checkbox input[type="checkbox"]:focus {
+  outline: none;
+  box-shadow: 0 0 3px #1d784f;
+}
+
+
+
+
 
 .search-result-item.even {
   background-color: #f9f9f9; /* Light grey for even items */
@@ -210,9 +265,10 @@
 }
 
 .result-content {
-  display: flex;
-  justify-content: space-between;
   width: 100%;
+  display: flex;
+  align-items: center; /* Vertically aligns elements */
+  gap: 20px; /* Add space between checkbox and text */
 }
 
 .result-buttons-grid {
@@ -222,10 +278,17 @@
   column-gap: 5px; /* Space between buttons horizontally */
   width: 100px;  /* Adjust width so it doesn't overflow */
   height: 120px; /* Adjust height based on your button size */
-  align-items: stretch; /* Ensure buttons stretch to fill available space */
-  justify-items: center; /* Center the buttons horizontally */
+  align-items: right; /* Ensure buttons stretch to fill available space */
+  justify-items: right; /* Center the buttons horizontally */
   margin-top: 2%; /* Move grid upwards */
-  margin-right: 60px; /* Move grid to the left */
+  margin-right: 100px; /* Move grid to the left */
+  justify-self: flex-end; /* If the parent is a grid */
+}
+
+.result-buttons {
+  display: flex;
+  justify-content: flex-end; /* Aligns buttons to the right */
+  flex-grow: 1; /* Allows it to take up remaining space */
 }
 
 .result-buttons-grid a, .result-buttons-grid button {

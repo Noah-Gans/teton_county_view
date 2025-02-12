@@ -16,7 +16,7 @@ const Signup = () => {
   const [error, setError] = useState("");
   const [userId, setUserId] = useState(null);
   const [isVerified, setIsVerified] = useState(false);
-  
+  const [showRedirectPopup, setShowRedirectPopup] = useState(false); // Popup state
   const navigate = useNavigate();
   const functions = getFunctions();
   const createCheckoutSession = httpsCallable(functions, "createCheckoutSession");
@@ -85,6 +85,7 @@ const Signup = () => {
         setError("Please verify your email first.");
         return;
       }
+      setShowRedirectPopup(true); // Show popup before redirecting
       // user is verified, create checkout session
       const result = await createCheckoutSession({
         email: auth.currentUser.email,
@@ -95,93 +96,80 @@ const Signup = () => {
     } catch (err) {
       console.error(err);
       setError(err.message);
+      setShowRedirectPopup(false); // Hide popup if error occurs
     }
   };
 
   return (
     <div className="signup-page">
       <div className="signup-left">
-        <h1>Subscribe to Teton GIS</h1>
-        <p>Access advanced mapping tools, custom prints, and priority support.</p>
+        <h1>A Better Teton County GIS Subscription</h1>
+        
+        <p className = "subheader-signup"> If you use the county GIS platform every week, this subscription is worth its cost in time saved. </p>
+        {/* Features Section */}
         <ul>
-          <li>Detailed layers</li>
-          <li>Export & print in high resolution</li>
-          <li>24/7 support</li>
+          <li>📍 Detailed layers</li>
+          <li>⏱️ Updated Daily</li>
+          <li>📊 Built In Report Builder</li>
+          <li>⚡ Always Improving</li>
         </ul>
-        <p className="price">$9.99 / month</p>
+        <p className="price">$00.00 / month</p>
         <p><small>Cancel anytime, no hidden fees.</small></p>
       </div>
 
       <div className="signup-right">
-        <button className="close-button" onClick={() => navigate('/')}>X</button>
-        
-        {/* STEP 1: Create Account */}
-        <div className={`signup-step ${step >= 1 ? "active-step" : ""} ${step > 1 ? "blurred" : ""}`}>
+        <button className="close-button" onClick={() => navigate('/')}>✖</button>
+
+        {/* Step 1: Create Account */}
+        <div className={`signup-step ${step === 1 ? "active-step" : "blurred-step"}`}>
           <h2>Create Your Account</h2>
           {error && step === 1 && <div className="error-message">{error}</div>}
-          <input
-            type="email"
-            placeholder="Email"
-            value={email}
-            disabled={step > 1}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            disabled={step > 1}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Confirm Password"
-            value={confirmPass}
-            disabled={step > 1}
-            onChange={(e) => setConfirmPass(e.target.value)}
-          />
-          {step === 1 && (
-            <button className="primary-button" onClick={handleCreateAccount}>
-              Create Account
-            </button>
-          )}
+          
+          <div className="signup-input-wrapper">
+            <div className="signup-input-container">
+              <input type="email" placeholder="Email" value={email} disabled={step > 1} onChange={(e) => setEmail(e.target.value)} />
+              <input type="password" placeholder="Password" value={password} disabled={step > 1} onChange={(e) => setPassword(e.target.value)} />
+              <input type="password" placeholder="Confirm Password" value={confirmPass} disabled={step > 1} onChange={(e) => setConfirmPass(e.target.value)} />
+            </div>
+
+            {step === 1 && (
+              <button className="create-account-btn" onClick={handleCreateAccount}>
+                Create <br /> Account
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* STEP 2: Email Verification */}
-        <div className={`signup-step ${step >= 2 ? "active-step" : ""}`}>
+        {/* Step 2: Email Verification */}
+        <div className={`signup-step ${step === 2 ? "active-step" : "blurred-step"}`}>
           {step >= 2 && (
             <>
               <h2>Verify Your Email</h2>
               {error && step === 2 && <div className="error-message">{error}</div>}
-              <p>
-                We’ve sent a verification link to <strong>{email}</strong>.
-                Once verified, you can continue to payment.
-              </p>
+              <p>We've sent a verification link to <strong>{email}</strong>. Once verified, you can continue to payment.</p>
 
               {isVerified ? (
-                <div style={{ color: "green", margin: "10px 0" }}>
-                  Email verified! You may continue.
-                </div>
+                <div className="verified-message">✅ Email verified! </div>
               ) : (
-                <div style={{ margin: "10px 0", color: "#666" }}>
-                  Checking your verification status automatically...
-                  <br />
-                  (Please confirm the email link we sent)
-                </div>
+                <div className="verification-check">Waiting for verification...</div>
               )}
 
-              <button
-                className="primary-button"
-                disabled={!isVerified}
-                style={{ marginTop: "10px" }}
-                onClick={handleContinueToPayment}
-              >
+              <button className="primary-button" disabled={!isVerified} onClick={handleContinueToPayment}>
                 Continue to Payment
               </button>
             </>
           )}
         </div>
       </div>
+
+      {/* Payment Redirect Popup */}
+      {showRedirectPopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <p>🔒 Taking you to a secure payment portal... Please wait.</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

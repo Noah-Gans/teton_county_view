@@ -5,57 +5,385 @@
     height: 100vh;
     z-index: 9999;
     display: flex;
-    background-color: #ffffff;
+    /*background: url('/public/teton_full.jpg') no-repeat center;*/
+
   }
   .signup-left, .signup-right {
     flex: 1;
     padding: 40px;
   }
-  .signup-left {
-    background: #f2f5f9;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .signup-right {
-    background: #fff;
-    position: relative;
-  }
-  .close-button {
-    position: absolute;
-    top: 20px; 
-    right: 20px;
-    background: transparent;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-  }
-  .primary-button {
-    background: #006b45;
-    color: #fff;
-    border: none;
-    border-radius: 6px;
-    padding: 12px 20px;
-    cursor: pointer;
-  }
-  /* Already have .signup-page, .signup-left, .signup-right, .close-button, .primary-button from your example */
 
+
+
+
+
+
+  /* Left side: Subscription Info */
+/* Left Side: Subscription Info */
+.signup-left {
+  background: #133f30;
+  color: white;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  border-radius: 10px 0 0 10px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add background image (optional) */
+.signup-left::before {
+  background: url('/public/teton.jpg') no-repeat center;
+  content: "";
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  opacity: 0.15; /* Subtle overlay */
+  z-index: 0;
+}
+
+/* Left Content */
+.signup-left-content {
+  position: relative;
+  z-index: 2;
+  max-width: 500px;
+}
+
+/* Title */
+.signup-left h1 {
+  font-size: 34px;
+  font-weight: bold;
+  color: white;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+}
+
+/* Subtitle */
+.subheader-signup {
+  font-size: 20px;
+  font-weight: 500;
+  color: #FFD700;
+  margin-bottom: 25px;
+}
+
+.features-title {
+  font-size: 22px;
+  font-weight: bold;
+  text-transform: uppercase;
+  margin-top: 20px;
+  color: white; /* Gold accent */
+  letter-spacing: 1px;
+  margin-bottom: -5px;
+  margin-top: 20px;
+}
+
+
+/* Bullet List */
+.signup-left ul {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  margin: 20px 0;
+  
+}
+
+.signup-left ul li {
+  font-size: 18px;
+  margin: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Icons for bullets */
+.signup-left ul li::before {
+  content: "✔";
+  color: #FFD700;
+  font-size: 20px;
+}
+
+/* Subscription Pricing */
+.price {
+  font-size: 28px;
+  font-weight: bold;
+  margin-top: 20px;
+  color: #FFD700;
+}
+
+/* Small disclaimer */
+.signup-left small {
+  font-size: 14px;
+  color: #f2f2f2;
+}
+
+
+/* Ensure inputs are stacked properly */
+.signup-input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between; /* Creates spacing between inputs & button */
+  gap: 20px; /* Space between input fields and button */
+  width: 80%;
+  margin: auto;
+}
+
+/* Input container: Forces vertical stacking */
+.signup-input-container {
+  display: flex;
+  flex-direction: column; /* Ensures inputs are stacked */
+  gap: 10px;
+  width: 100%;
+}
+
+/* Style input fields */
+.signup-input-container input {
+  width: 90%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+}
+
+/* Modern Create Account Button */
+.create-account-btn {
+  background: linear-gradient(135deg, #008c5f, #005b3c); /* Smooth gradient */
+  color: white;
+  border: none;
+  border-radius: 16px; /* Slightly rounder edges */
+  padding: 24px 32px; /* Slightly bigger */
+  font-size: 20px; /* Large text */
+  font-weight: bold;
+  white-space: pre-line; /* Keep text on two lines */
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 220px; /* Make button wider */
+  height: 110px; /* Slightly taller */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2); /* Soft shadow */
+  border: 2px solid transparent;
+}
+
+/* Hover Effect */
+.create-account-btn:hover {
+  background: linear-gradient(135deg, #00724c, #00422c);
+  transform: scale(1.08); /* Slightly larger */
+  box-shadow: 0px 6px 12px rgba(0, 0, 0, 0.3); /* Stronger shadow */
+}
+
+/* Active (Clicked) Effect */
+.create-account-btn:active {
+  transform: scale(1.02); /* Slight press-in effect */
+  box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Focus (Keyboard Selection) Effect */
+.create-account-btn:focus {
+  border: 2px solid white;
+  outline: none;
+  box-shadow: 0px 0px 8px rgba(255, 255, 255, 0.5);
+}
+
+
+/* Right Side: Signup Form */
+.signup-right {
+  background: #ffffff;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 50px;
+  border-radius: 0 10px 10px 0;
+  box-shadow: 5px 5px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* Move H2 Titles Up */
+.signup-step h2 {
+  margin-top: -10px; /* Moves title closer to the top */
+  margin-bottom: 10px; /* Ensures space below */
+  font-size: 24px;
+  font-weight: bold;
+  color: #133f30;
+}
+
+/* Signup Steps: Styling */
 .signup-step {
-    margin-bottom: 2rem;
-    transition: filter 0.4s ease, opacity 0.4s ease;
-  }
+  min-height: 220px; /* Adjusted for consistency */
+  padding: 5px;
+  padding-top: 25px;
+  position: relative;
+  background: rgba(255, 255, 255, 0.97); /* Slight transparency */
+  border-radius: 12px;
+  box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 25px; /* Vertical spacing between steps */
+}
+
+/* Blur effect for inactive steps */
+.blurred-step {
+  filter: blur(2px); /* Lighter blur */
+  opacity: 0.8;
+  pointer-events: none;
+}
+
+/* Input Styling */
+.signup-input-container input {
+  width: 80%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  transition: border 0.2s ease-in-out;
+  gap: 20px;
   
-  /* When the step is "completed" we can blur it a bit. 
-     The logic is in the JS: if step > currentStep => add .blurred */
-  .blurred {
-    filter: blur(3px);
-    opacity: 0.6;
-    pointer-events: none; /* disallow clicks on old steps */
-  }
-  
-  .active-step {
-    /* we can highlight it if we want, e.g. a border or something: */
-    border-left: 4px solid #006b45;
-    padding-left: 10px;
-  }
-  
+}
+
+/* Input focus effect */
+.signup-input-container input:focus {
+  border: 2px solid #006b45;
+  outline: none;
+  box-shadow: 0px 2px 8px rgba(0, 107, 69, 0.2);
+}
+
+/* Create Account Button */
+.create-account-btn {
+  background: linear-gradient(135deg, #008c5f, #005b3c);
+  color: white;
+  border: none;
+  border-radius: 14px;
+  padding: 20px 30px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 50%;
+  height: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover effect */
+.create-account-btn:hover {
+  background: linear-gradient(135deg, #00724c, #00422c);
+  transform: scale(1.05);
+}
+
+/* Verification Step */
+.verification-check {
+  text-align: center;
+  font-size: 18px;
+  font-weight: 500;
+  color: #555;
+  padding: 12px 15px;
+  background: rgba(0, 107, 69, 0.1);
+  border-radius: 8px;
+  width: 50%;
+  margin: auto;
+  margin-bottom: 15px;
+
+}
+
+/* Verified Message */
+.verified-message {
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: #008c5f;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(0, 107, 69, 0.15);
+  border-radius: 8px;
+  width: 50%;
+  margin: auto;
+  margin-bottom: 15px;
+
+
+
+}
+
+/* Primary Button (Continue to Payment) */
+.primary-button {
+  background: linear-gradient(135deg, #008c5f, #005b3c);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 14px 24px;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease-in-out;
+  width: 100%;
+  max-width: 300px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 0 auto;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Hover Effect */
+.primary-button:hover {
+  background: linear-gradient(135deg, #00724c, #00422c);
+  transform: scale(1.05);
+}
+
+/* Disabled Button Styling */
+.primary-button:disabled {
+  background: #ccc;
+  color: #666;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* Close Button */
+.close-button {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #333;
+  transition: color 0.3s ease-in-out;
+}
+
+.close-button:hover {
+  color: #006b45;
+}
+
+
+
+
+/* Popup Overlay */
+.popup-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 10000;
+}
+
+/* Popup Box */
+.popup {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+

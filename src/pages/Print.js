@@ -1,13 +1,14 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useCallback, useContext, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DataContext } from '../assets/DataContext';
 import './Print.css';
 import { useMapContext } from './MapContext';
 import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
+import ReportTable from './ReportTable'; // path depends on your file structure
 
 const Reports = () => {
   const { setGlobalActiveTab, startPolygonDraw, polygonData, passPolygonToReportBuilder, toggleLayerVisibility, startGeoFilter, clearGeoFilter, selectedColumns, toggleColumn, selectedFeature, isFilterTriggered, setIsFilterTriggered } = useMapContext();
-  const { reportData, loadingReport } = useContext(DataContext);
+  const {reportData, loadingReport } = useContext(DataContext);
   const [filteredRows, setFilteredRows] = useState([]); // State for filtered rows
   const [page, setPage] = useState(0);
   const [visibleColumns, setVisibleColumns] = useState([]); // Track visible columns
@@ -20,6 +21,7 @@ const Reports = () => {
   const lines = reportData.split('\n');
   const headers = lines[0]?.split('|') || []; // Use the first line as headers
   const [dropdownState, setDropdownState] = useState({
+    generalPropertyInfo: false,
     propertyDetails: false,
     taxInformation: false,
   });
@@ -41,21 +43,21 @@ const Reports = () => {
     return row;
   });
   
-  const isColumnVisible = (column) => selectedColumns.includes(column);
   // Pagination logic
   const totalPages = Math.ceil(
     (filteredRows.length > 0 ? filteredRows.length : rows.length) / rowsPerPage
-  );  const currentRows = (filteredRows.length > 0 ? filteredRows : rows).slice(
+  );  
+  const currentRows = (filteredRows.length > 0 ? filteredRows : rows).slice(
     page * rowsPerPage,
     (page + 1) * rowsPerPage
   );  
   // Define grouped columns
-  const toggleDropdown = (group) => {
+  const toggleDropdown = useCallback((group) => {
     setDropdownState((prev) => ({
       ...prev,
       [group]: !prev[group],
     }));
-  };
+  }, []);
 
   const handleSort = (key) => {
     let direction = 'ascending';
@@ -105,24 +107,26 @@ const Reports = () => {
     setFilteredRows(filtered);
   };
   
-  
-  const propertyDetailsColumns = [
+  const generalPropertyInfoColumns = [
     "PIDN",
     "Account",
     "Property Owner(s)",
     "Mailing Address",
-    "Street Address",
-    "Location",
-    "Actual Market Value",
+    "Tax ID",
+  ];
+
+  const propertyDetailsColumns = [
+    "Actual Market Value Total",
+    "Actual Market Value Land",
+    "Actual Market Value Improvements",
     "Market Value Breakdown",
     "Property Class",
     "Number Of Developments",
-    "Developments",
     "Legal Description",
   ];
 
 const taxInformationColumns = [
-  "Tax ID",
+  
   "Tax District",
   "First Half Levied",
   "First Half Interest",
@@ -165,33 +169,10 @@ const taxInformationColumns = [
   }, [polygonData]);
 
 
-  useEffect(() => {
-  if (polygonData) {
-    console.log(reportData)
-    console.log("Row.center before filtering:", rows.map(row => row.PIDN));
-    console.log('Polygon Data Geometry:', polygonData.geometry);
-    console.log('Filtering rows based on polygonData:', polygonData);
-
-    const filtered = rows.filter((row) => {
-      // Ensure `row.center` is a valid point
-      const centerPoint = row.center ? [row.center[0], row.center[1]] : null;
-
-      // Ensure `polygonData.geometry` is correctly formatted
-      if (centerPoint && polygonData.geometry) {
-        return booleanPointInPolygon(centerPoint, polygonData.geometry);
-      }
-      return false;
-    });
-
-    setFilteredRows(filtered);
-    console.log('Filtered rows:', filtered);
-  } else {
-    setFilteredRows(rows); // Reset to all rows if no polygonData
-  }
-}, [polygonData, reportData]); // Re-run when polygonData or reportData changes
-
 
 const handleDownload = () => {
+  console.log("Filtered Rows:", filteredRows);
+  console.log("Selected Columns:", selectedColumns);
   const csvContent = generateCSV();
   if (!csvContent) return; // Stop if there's no data
 
@@ -226,10 +207,14 @@ useEffect(() => {
 }, [isFilterTriggered, selectedFeature, rows]);
 
 const generateCSV = () => {
-  if (!filteredRows.length || !selectedColumns.length) {
+
+  if (!selectedColumns.length) {
     alert('No data available to download.');
     return '';
   }
+
+
+  const dataToDownload = filteredRows.length ? filteredRows : rows;
 
   // Helper function to safely wrap a value in double quotes and escape internal quotes
   const escapeValue = (value) => {
@@ -242,7 +227,8 @@ const generateCSV = () => {
   const csvHeader = selectedColumns.map(escapeValue).join(',');
 
   // Generate rows for each filtered row
-  const csvRows = filteredRows.map((row) =>
+  // Generate CSV rows
+  const csvRows = dataToDownload.map((row) =>
     selectedColumns.map((col) => escapeValue(row[col] || '')).join(',')
   );
 
@@ -291,38 +277,44 @@ const generateCSV = () => {
             <button className="action-button" onClick={handleDownload}>
               Download
             </button>
-            <button className="action-button" onClick={handleGeoFilter}>
-              Geo Filter
-            </button>
-            {/* GeoFilter Notice */}
-            {/* GeoFilter Notice */}
-            {polygonData && (
-              <div className="geo-filter-notice">
-                <div>
-                  GeoFilter applied: <span>{polygonData.areaInAcres} acres</span> and <span>{filteredRows.length} parcels</span> selected
-                </div>
-                <button className="geo-filter-clear" onClick={handleClearGeoFilter}>
-                  X
-                </button>
-              </div>
-            )}
-            <div className="attribute-dropdown">
+            
+            
+            <div className="attribute-dropdown-reports">
               <h3>Select Attributes</h3>
 
-              {/* Property Details Dropdown */}
-              <div className="dropdown-group">
+              <div className="dropdown-group-reports">
                 <button
-                  className="dropdown-header"
+                  className="dropdown-header-reports"
+                  onClick={() => toggleDropdown('generalPropertyInfo')}
+                >
+                  General Property Info {dropdownState.generalPropertyInfo ? '▲' : '▼'}
+                </button>
+                {dropdownState.generalPropertyInfo && (
+                  <div className="dropdown-menu-reports">
+                    {generalPropertyInfoColumns.map((column, index) => (
+                      <div key={index} className="dropdown-item-reports" onClick={() => toggleColumn(column)}>
+                        <input type="checkbox" checked={selectedColumns.includes(column)} readOnly />
+                        {column}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Property Details Dropdown */}
+              <div className="dropdown-group-reports">
+                <button
+                  className="dropdown-header-reports"
                   onClick={() => toggleDropdown('propertyDetails')}
                 >
                   Property Details {dropdownState.propertyDetails ? '▲' : '▼'}
                 </button>
                 {dropdownState.propertyDetails && (
-                  <div className="dropdown-menu">
+                  <div className="dropdown-menu-reports">
                     {propertyDetailsColumns.map((column, index) => (
                       <div
                         key={index}
-                        className="dropdown-item"
+                        className="dropdown-item-reports"
                         onClick={() => toggleColumn(column)}
                       >
                         <input
@@ -338,19 +330,19 @@ const generateCSV = () => {
               </div>
 
               {/* Tax Information Dropdown */}
-              <div className="dropdown-group">
+              <div className="dropdown-group-reports">
                 <button
-                  className="dropdown-header"
+                  className="dropdown-header-reports"
                   onClick={() => toggleDropdown('taxInformation')}
                 >
                   Tax Information {dropdownState.taxInformation ? '▲' : '▼'}
                 </button>
                 {dropdownState.taxInformation && (
-                  <div className="dropdown-menu">
+                  <div className="dropdown-menu-reports">
                     {taxInformationColumns.map((column, index) => (
                       <div
                         key={index}
-                        className="dropdown-item"
+                        className="dropdown-item-reports"
                         onClick={() => toggleColumn(column)}
                       >
                         <input
@@ -380,35 +372,13 @@ const generateCSV = () => {
           {/* Main Panel */}
           <div className="main-panel">
             <div className="table-container">
-              <table className="report-table">
-              <thead>
-                <tr>
-                  {selectedColumns.map((header, index) => (
-                    <th key={index}>
-                      <div className="header-cell">
-                        <span onClick={() => handleSort(header)}>{header}</span>
-                        <input
-                          type="text"
-                          placeholder="Filter..."
-                          value={filters[header] || ''}
-                          onChange={(e) => handleFilter(header, e.target.value)}
-                        />
-                      </div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {currentRows.map((row, rowIndex) => (
-                  <tr key={rowIndex}>
-                    {selectedColumns.map((header, cellIndex) => (
-                      <td key={cellIndex}>{row[header]}</td>
-                    ))}
-                  </tr>
-                ))}
-              </tbody>
-
-              </table>
+            <ReportTable
+              currentRows={currentRows}
+              selectedColumns={selectedColumns}
+              filters={filters}
+              handleFilter={handleFilter}
+              handleSort={handleSort}
+            />
             </div>
             {/* Pagination component */}
             <div className="pagination">

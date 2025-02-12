@@ -94,7 +94,7 @@ const zoningColorMaps = {
     'Fish & Wildlife Service': '#FFA07A', // Light Coral (darker pastel orange)
     'Forest Service': '#77DD77', // Pastel Green
     'Local Government': '#DB35E0', // Steel Blue (replacing red with a calm blue tone)
-    'National Park Service': '#9370DB', // Medium Purple (slightly darker pastel purple)
+    'National Park Service': '#a670db', // Medium Purple (slightly darker pastel purple)
     'Private': '#A9A9A9', // Dark Gray (for better visibility if needed)
     'State': '#4169E1', // Cadet Blue (slightly darker pastel blue)
     'State (Wyoming Game & Fish)': '#4169E1', // Royal Blue (darker blue for Game & Fish)
@@ -102,13 +102,41 @@ const zoningColorMaps = {
     'default': '#A9A9A9', // Dark Gray (default)
   },
   conservation_easements: {
-    'Jackson Hole Land': '#006400', // Dark Green
-    'Teton County Scenic Preserve Trust': '#228B22', // Forest Green
-    'The Nature Conservancy': '#32CD32', // Lime Green
-    'Wyoming Game & Fish': '#2E8B57', // Sea Green
-    'Teton Regional Land Trust': '#3CB371', // Medium Sea Green
-    'USFS': '#A9A9A9', // Dark Sea Green
-  }
+    'Jackson Hole Land': '#006400', // Dark Green (unchanged - represents dense forests)
+    'Teton County Scenic Preserve Trust': '#8B4513', // Saddle Brown (for preserved lands with trees and open spaces)
+    'The Nature Conservancy': '#4682B4', // Steel Blue (introducing blue for environmental conservation & water-related areas)
+    'Wyoming Game & Fish': '#D2691E', // Chocolate (to represent mixed wildlife and habitat)
+    'Teton Regional Land Trust': '#FFD700', // Gold (to add variety and highlight regional uniqueness)
+    'USFS': '#708090', // Slate Gray (unchanged, representing federal land)
+  },
+  
+  precinctColorMap:{
+    '01-01': '#00BFFF', // Red-Orange
+    '01-02': '#33FF57', // Green
+    '01-03': '#3357FF', // Blue
+    '01-04': '#FF33A1', // Pink
+    '01-05': '#A133FF', // Purple
+    '01-06': '#FF8C00', // Dark Orange
+    '01-07': '#FF5733', // Deep Sky Blue
+    '01-08': '#FFD700', // Gold
+    '01-09': '#32CD32', // Lime Green
+    '01-10': '#FF1493', // Deep Pink
+    '01-11': '#8A2BE2', // Blue Violet
+    '02-01': '#DC143C', // Crimson
+    '03-01': '#00CED1', // Dark Turquoise
+    '04-01': '#FF4500', // Orange Red
+    '04-02': '#2E8B57', // Sea Green
+    '04-03': '#DA70D6', // Orchid
+    '04-04': '#8FBC8F', // Dark Sea Green
+    '05-01': '#6495ED', // Cornflower Blue
+},
+femaColorMap: {
+  "AE": "#FF4500",  // Orange-Red (high-risk)
+  "AO": "#FFA500",  // Orange (moderate risk)
+  "AH": "#FFD700",  // Gold/Yellow (lower risk)
+  "A": "#FF6347",   // Tomato (general high-risk zone)
+}
+
 };
 
 
@@ -154,7 +182,12 @@ export const loadCustomIcons = (map) => {
       return zoningColorMaps.publicLandColors;
     }else if (layerName == "conservation_easements"){
       return zoningColorMaps.conservation_easements;
+    }else if (layerName == "precincts"){
+      return zoningColorMaps.precinctColorMap;
+    }else if (layerName == "FEMA_updated"){
+      return zoningColorMaps.femaColorMap;
     }
+
   
     return {}; // Default empty object if no color map is found
   };
@@ -219,11 +252,12 @@ export const loadCustomIcons = (map) => {
   
     // Create a mapping of "Name" (e.g., "kml_249") to colors
     const featureColorMapping = {};
+    console.log(features)
     features.forEach((feature) => {
       if (feature.properties) {
         let colorKey;
         let keyForMapping; // Key to use for featureColorMapping
-        const { OBJECTID, Name, description } = feature.properties;
+        const { FLD_AR_ID, precinct, OBJECTID, Name, description } = feature.properties;
   
         if (layerName === 'public_land') {
           // Directly use OBJECTID as the key for public_land layers
@@ -234,14 +268,21 @@ export const loadCustomIcons = (map) => {
           const parsedProperties = parseDescription(description);
           keyForMapping = Name; // Use Name as the mapping key
           colorKey = parsedProperties[propertyKey]?.trim(); // Extract org_name
+        } else if (layerName === 'FEMA_updated') {
+          // Parse description to extract org_name
+          
+          keyForMapping = FLD_AR_ID;
+          colorKey = feature.properties.FLD_ZONE; // Extract org_nameelse if (layerName === 'precincts') {
+          // Parse description to extract org_name
+          
         } else if (description) {
           // Parse description for other layers
           const parsedProperties = parseDescription(description);
           keyForMapping = Name; // Default key for non-public_land layers
           colorKey = parsedProperties[propertyKey]?.trim();
         }
-  
         if (colorKey && keyForMapping) {
+          console.log("Came here")
           const color = colorMap[colorKey] || '#808080'; // Default color if no match
           featureColorMapping[keyForMapping] = color;
         }
@@ -249,13 +290,19 @@ export const loadCustomIcons = (map) => {
     });
   
     // Create an expression for data-driven styling
-    const colorExpression = ['match', ['get', layerName === 'public_land' ? 'OBJECTID' : 'Name']];
+    const matchKey = layerName === 'public_land' ? 'OBJECTID' 
+              : layerName === 'precincts' ? 'precinct' 
+              : layerName === 'FEMA_updated' ? 'FLD_AR_ID' 
+              : 'Name';
+    const colorExpression = ['match', ['get', matchKey]];
     const opacityExpression = ['match', ['get', layerName === 'public_land' ? 'OBJECTID' : 'Name']];
-  
+    console.log("came here")
+    console.log(featureColorMapping)
     Object.keys(featureColorMapping).forEach((key) => {
+      console.log(key)
       // Convert key to number for Mapbox match expression
       const numericKey = layerName === 'public_land' ? parseInt(key, 10) : key;
-  
+      console.log(numericKey)
       colorExpression.push(numericKey);
       colorExpression.push(featureColorMapping[key]);
   
@@ -303,6 +350,51 @@ export const loadCustomIcons = (map) => {
         visibility: 'visible',
       },
     },
+    precincts: {
+      id: 'precincts-layer',
+      type: 'fill',
+      'source-layer': 'precincts', // Adjust based on your vector tile source
+      paint: {}, // Dynamic paint will be applied later
+      layout: {
+          visibility: 'visible',
+      },
+    },
+    FEMA_updated: {
+      id: 'FEMA_updated-layer',
+      type: 'fill',
+      'source-layer': 'FEMA_updated', // Adjust based on your vector tile source
+      paint: {}, // Dynamic paint will be applied later
+      layout: {
+          visibility: 'visible',
+      },
+    },
+    ownership_outer_borders: {
+      id: "ownership-outer-borders",
+      type: "line",
+      "source-layer": "ownership",
+      paint: {
+        "line-color": "rgb(0, 0, 0)", // Black outline
+        "line-width": .5, // Adjust thickness for visibility
+        "line-opacity": 1, // Make it visible
+      },
+      layout: {
+        visibility: "visible",
+      },
+    },
+    ownership_inner_borders: {
+      id: "ownership-inner-borders",
+      type: "line",
+      "source-layer": "ownership",
+      paint: {
+        "line-color": "rgb(0, 0, 0)", // Black outline
+        "line-width": .5, // Adjust thickness for visibility
+        "line-opacity": 0, // Make it visible
+      },
+      layout: {
+        visibility: "visible",
+      },
+    },
+    
     zoning: {
       id: 'zoning-layer',
       type: 'fill',
@@ -404,18 +496,81 @@ export const loadCustomIcons = (map) => {
         visibility: 'visible',
       },
     },
+    mooose_reprojected: {
+      id: 'mooose_reprojected-layer',
+      type: 'fill',
+      'source-layer': 'mooose_reprojected',
+      paint: {
+        'fill-color': 'rgb(78, 43, 4)',
+        'fill-opacity': 0.7,
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    },
+    reporjected_elk: {
+      id: 'reporjected_elk-layer',
+      type: 'fill',
+      'source-layer': 'reporjected_elk',
+      paint: {
+        'fill-color': 'rgb(187, 124, 53)',
+        'fill-opacity': 0.7,
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    },
+    bigHorn_reporjected: {
+      id: 'bigHorn_reporjected-layer',
+      type: 'fill',
+      'source-layer': 'bigHorn_reporjected',
+      paint: {
+        'fill-color': 'rgb(129, 142, 148)',
+        'fill-opacity': 0.8,
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    },
+    mule_deer_reporjected: {
+      id: 'mule_deer_reporjected-layer',
+      type: 'fill',
+      'source-layer': 'mule_deer_reporjected',
+      paint: {
+        'fill-color': 'rgb(107, 85, 59)',
+        'fill-opacity': 0.7,
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    },
+    owndrship_address: {
+      id: 'ownership_address-layer',
+      type: 'symbol',
+      'source-layer': 'ownership_address',
+      defaultPaint: {},
+      defaultLayout: {
+        'icon-image': 'dot-10', // Default Mapbox marker icon (scaled for 15px size)
+        'icon-size': 1.5,         // Adjust the size of the icon
+        'icon-anchor': 'bottom',  // Anchor the icon at the bottom
+        'icon-allow-overlap': true, // Allow markers to overlap
+      },
+      layout: {
+        visibility: 'visible',
+      },
+    },
   };
   
   // Updated `getLayerStyle` function
-  export const getLayerStyle = (layerName, features) => {
+  export const getLayerStyle = (layerName, features, baseMap) => {
     console.log('Getting style for layer:', layerName);
-  
+    console.log(baseMap)
     // Get the base style from layerStyles
     let style = layerStyles[layerName];
     console.log('Layer Name:', layerName);
   
     // Define layers that need dynamic styling based on zoning features
-    const dynamicZoningLayers = ['conservation_easements', 'zoning', 'public_land', 'zoning_toj_zoning', 'toj_zoning', 'zoning_toj_zoning_overlay','roads', 'zoning_zoverlay'];
+    const dynamicZoningLayers = ["FEMA_updated", "precincts", 'conservation_easements', 'zoning', 'public_land', 'zoning_toj_zoning', 'toj_zoning', 'zoning_toj_zoning_overlay','roads', 'zoning_zoverlay'];
     console.log(dynamicZoningLayers.includes(layerName))
     console.log(style)
     console.log(layerName.toLowerCase().includes('plss'))
@@ -431,10 +586,27 @@ export const loadCustomIcons = (map) => {
             };
         }
          else {
+            const adjustedSource = 
+            layerName === "ownership_borders" || 
+            layerName === "ownership_outer_borders" || 
+            layerName === "ownership_inner_borders" 
+              ? "ownership" 
+              : layerName;
+        
+
             style = {
                 ...style,
-                source: layerName, // Set the source to match the layer name
+                source: adjustedSource, // Set the source to match the layer name
             };
+            // 🔹 Adjust ownership border color based on basemap
+            if (layerName === "ownership" || layerName === "ownership_outer_borders" ) {
+              console.log("Adjusting ownership border color for basemap:", baseMap);
+              style.paint = {
+                ...style.paint,
+                "line-color": baseMap.current === "satellite-v9" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)", // White on satellite, black otherwise
+                
+              };
+            }
         }
         return style;
     }
@@ -460,102 +632,116 @@ export const loadCustomIcons = (map) => {
     // If no style is found for the given layer, return a default style for testing purposes
     console.warn(`No style found for layer: ${layerName}. Using default style.`);
     let defaultPaint;
-let defaultLayout = {}; // Initialize defaultLayout
-let layerType;
-console.log(layerName);
+    let defaultLayout = {}; // Initialize defaultLayout
+    let layerType;
+    console.log(layerName);
 
-switch (layerName) {
-  case 'ownership_address': // For points
-  layerType = 'symbol';
-  defaultPaint = {}; // No paint properties for symbols
-  defaultLayout = {
-    'icon-image': 'marker-15', // Default Mapbox marker icon (scaled for 15px size)
-    'icon-size': 1.5,         // Adjust the size of the icon
-    'icon-anchor': 'bottom',  // Anchor the icon at the bottom
-    'icon-allow-overlap': true, // Allow markers to overlap
-  };
+    switch (layerName) {
+      case 'ownership_address': // For points
+      layerType = 'symbol';
+      defaultPaint = {}; // No paint properties for symbols
+      defaultLayout = {
+        'icon-image': 'custom-pin', // Default Mapbox marker icon (scaled for 15px size)
+        'icon-size': 0.05,         // Adjust the size of the icon
+        'icon-anchor': 'bottom',  // Anchor the icon at the bottom
+        'icon-allow-overlap': true, // Allow markers to overlap
+      };
 
-  // Add the source with clustering enabled
-  style = {
-    id: 'ownership-address-layer',
-    type: layerType,
-    source: {
-      type: 'geojson',
-      data: 'src/assets/data/ownership_address.geojson', // Path to your GeoJSON file
-      cluster: true, // Enable clustering
-      clusterMaxZoom: 16, // Reduce max zoom to keep clusters grouped for longer
-      clusterRadius: 500, // Radius of each cluster in pixels
-    },
-    paint: defaultPaint,
-    layout: defaultLayout,
-  };
-  break;
+      // Add the source with clustering enabled
+      style = {
+        id: 'ownership-address-layer',
+        type: layerType,
+        source: {
+          type: 'geojson',
+           // Path to your GeoJSON file
+          cluster: true, // Enable clustering
+          clusterMaxZoom: 12, // Reduce max zoom to keep clusters grouped for longer
+          clusterRadius: 100, // Radius of each cluster in pixels
+        },
+        paint: defaultPaint,
+        layout: defaultLayout,
+      };
+      break;
 
-  case 'control_points_controls': // For points
-    layerType = 'circle';
-    defaultPaint = {
-      'circle-radius': 6,
-      'circle-color': '#FF0000', // Red for testing visibility
-      'circle-stroke-width': 1,
-      'circle-stroke-color': '#000000', // Black outline for points
+      case 'control_points_controls': // For points
+        layerType = 'circle';
+        defaultPaint = {
+          'circle-radius': 6,
+          'circle-color': '#FF0000', // Red for testing visibility
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#000000', // Black outline for points
+        };
+        break;
+
+      case 'precincts_polling_centers': // For points (NO CLUSTERING)
+      layerType = 'circle';
+      defaultPaint = {
+        'circle-radius': 6,
+        'circle-color': '#FF0000', // Red for testing visibility
+        'circle-stroke-width': 1,
+        'circle-stroke-color': '#000000', // Black outline for points
+      };
+      style = {
+        id: 'precincts-polling-centers-layer',
+        type: layerType,
+        source: {
+          type: 'geojson',
+          data: 'src/assets/data/precincts_polling_centers.geojson',
+          cluster: false, // Enable clustering // Ensure correct path
+
+          // No clustering properties included here
+        },
+        paint: defaultPaint,
+        layout: defaultLayout,
+      };
+      break;
+      
+
+      case 'plss_plss_labels': // For point labels
+        layerType = 'symbol'; // Use symbol type for labels
+        defaultPaint = {
+          'text-color': '#000000', // Black text
+          'text-halo-color': '#FFFFFF', // White halo for better readability
+          'text-halo-width': 1,
+        };
+        defaultLayout = {
+          'text-field': ['get', 'label'], // Ensure the "label" property exists in the features
+          'text-size': 14, // Adjust text size
+          'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], // Specify font
+          'text-anchor': 'center', // Center the label
+          visibility: 'visible',
+        };
+        break;
+
+      case 'roads_easements': // Example for lines
+        layerType = 'line';
+        defaultPaint = {
+          'line-color': '#896B3D', // Blue for roads
+          'line-width': 1.25,
+        };
+        break;
+
+      default: // Polygons (default)
+        layerType = 'fill';
+        defaultPaint = {
+          'fill-color': '#FF00FF', // Magenta for testing visibility
+          'fill-opacity': 0.5,
+          'fill-outline-color': '#000000', // Black border for polygons
+        };
+        break;
+    }
+
+    return {
+      id: `${layerName}-layer`,
+      type: layerType,
+      source: layerName,
+      'source-layer': layerName,
+      paint: defaultPaint,
+      layout: {
+        ...defaultLayout, // Include layout properties
+        visibility: 'visible',
+      },
     };
-    break;
-
-  case 'precincts_polling_centers': // For points
-    layerType = 'circle';
-    defaultPaint = {
-      'circle-radius': 6,
-      'circle-color': '#FF0000', // Red for testing visibility
-      'circle-stroke-width': 1,
-      'circle-stroke-color': '#000000', // Black outline for points
-    };
-    break;
-
-  case 'plss_plss_labels': // For point labels
-    layerType = 'symbol'; // Use symbol type for labels
-    defaultPaint = {
-      'text-color': '#000000', // Black text
-      'text-halo-color': '#FFFFFF', // White halo for better readability
-      'text-halo-width': 1,
-    };
-    defaultLayout = {
-      'text-field': ['get', 'label'], // Ensure the "label" property exists in the features
-      'text-size': 14, // Adjust text size
-      'text-font': ['Open Sans Bold', 'Arial Unicode MS Bold'], // Specify font
-      'text-anchor': 'center', // Center the label
-      visibility: 'visible',
-    };
-    break;
-
-  case 'roads_easements': // Example for lines
-    layerType = 'line';
-    defaultPaint = {
-      'line-color': '#896B3D', // Blue for roads
-      'line-width': 1.25,
-    };
-    break;
-
-  default: // Polygons (default)
-    layerType = 'fill';
-    defaultPaint = {
-      'fill-color': '#FF00FF', // Magenta for testing visibility
-      'fill-opacity': 0.5,
-      'fill-outline-color': '#000000', // Black border for polygons
-    };
-    break;
-}
-
-return {
-  id: `${layerName}-layer`,
-  type: layerType,
-  source: layerName,
-  'source-layer': layerName,
-  paint: defaultPaint,
-  layout: {
-    ...defaultLayout, // Include layout properties
-    visibility: 'visible',
-  },
-};
 }
   
   

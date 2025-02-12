@@ -57,56 +57,65 @@ const Login = () => {
 
         {!showReset ? (
           <>
-            <h2>Login</h2>
-            {error && <p style={{ color: "red" }}>{error}</p>}
+            <div className="login-header">
+              <img src="/test.svg" alt="Logo" className="login-logo" />
+              <h2>
+                <span className="title-main">A Better Teton County GIS</span>
+              </h2>
+            </div>
+            {error && <p className="error-message">{error}</p>}
             <input
               type="email"
+              className="login-input"
               placeholder="Email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
             <input
               type="password"
+              className="login-input"
               placeholder="Password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
-            <button onClick={handleLogin}>Sign In</button>
-            
+            {/* Login Button */}
+            <button className="login-btn" onClick={handleLogin}>Sign In</button>
+
             {/* Forgot password link */}
-            <p style={{ marginTop: "10px" }}>
-              <small onClick={() => setShowReset(true)} style={{ cursor: "pointer", color: "blue" }}>
-                Forgot password?
-              </small>
+            {/* Forgot Password */}
+            <p className="reset-email-btn">
+              <small onClick={() => setShowReset(true)}>Forgot password?</small>
             </p>
 
-            <p style={{ marginTop: "10px" }}>
-              Don't have an account? <Link to="/signup">Sign Up</Link>
+            {/* Sign Up Link */}
+            <p className="register-link">
+              Need an account? <Link to="/signup">Sign Up</Link>
             </p>
           </>
         ) : (
           // Forgot password form
+          // Reset Password Form
           <>
-            <h2>Reset Password</h2>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            {resetMessage && <p style={{ color: "green" }}>{resetMessage}</p>}
+            <h2>
+                <span className="reset-title">Reset Password</span>
+            </h2>
+            
+            {error && <p className="error-message">{error}</p>}
+            {resetMessage && <p className="success-message">{resetMessage}</p>}
+
             <input
               type="email"
-              placeholder="Email"
+              className="login-input"
+              placeholder="Enter your email"
               value={resetEmail}
               onChange={(e) => setResetEmail(e.target.value)}
             />
-            <button 
-            className="reset-email-btn" 
-            onClick={handleForgotPassword}
-            >
-            Send Reset Email
+            <button className="reset-email-btn" onClick={handleForgotPassword}>
+              Send Reset Email
             </button>
 
-            <p style={{ marginTop: "10px" }}>
-              <small onClick={() => setShowReset(false)} style={{ cursor: "pointer", color: "blue" }}>
-                Back to login
-              </small>
+            <p className="login-link">
+              <small onClick={() => setShowReset(false)}>Back to login</small>
             </p>
           </>
         )}

@@ -5,6 +5,7 @@ import { layerNameMappings } from './layerMappings'; // Import layer mappings
 import { useMapContext } from '../pages/MapContext';
 import { useNavigate } from 'react-router-dom';
 import { memo } from 'react';
+import * as turf from '@turf/turf';
 
 const SidePanel = memo(({
   isOpen,
@@ -27,12 +28,32 @@ const SidePanel = memo(({
   const [isPrecinctsOpen, setIsPrecinctsOpen] = useState(false);
   const [isControlPointsOpen, setIsControlPointsOpen] = useState(false);
   const [isAnimalHabitatOpen, setIsAnimalHabitatOpen] = useState(false);
-
+  const [isNaturalHazardsOpen, setIsNaturalHazardsOpen] = useState(false);
   const {setHoveredFeatureId, setGlobalActiveTab, setIsFilterTriggered, layerOrder, setLayerOrder } = useMapContext();
   const navigate = useNavigate();
 
   // State to manage legend visibility for each layer
   const [isLegendOpen, setIsLegendOpen] = useState({});
+
+  const calculateFeatureArea = (feature) => {
+    if (!feature || !feature.geometry) return 'N/A';
+
+    try {
+        // Convert feature geometry into a Turf.js polygon/multi-polygon
+        const featurePolygon = turf.feature(feature.geometry);
+
+        // Calculate area in square meters
+        const areaSqMeters = turf.area(featurePolygon);
+
+        // Convert to acres (1 square meter = 0.000247105 acres)
+        const areaAcres = (areaSqMeters * 0.000247105).toFixed(2);
+
+        return `${areaAcres} acres`;
+    } catch (error) {
+        console.error("Error calculating area:", error);
+        return 'N/A';
+    }
+};
 
   const handleLayerSelection = (layerName) => {
     // Toggle the layer visibility using setLayerStatus
@@ -84,6 +105,9 @@ const SidePanel = memo(({
       case 'CriticalAnimalHabitat':
         setIsAnimalHabitatOpen(!isAnimalHabitatOpen);
         break;
+      case 'NaturalHazards':
+        setIsNaturalHazardsOpen(!isNaturalHazardsOpen);
+        break;
       default:
         break;
     }
@@ -111,14 +135,26 @@ const SidePanel = memo(({
     const parsedDescription = feature.properties.description ? parseDescription(feature.properties.description) : {};
   
     // Determine feature type based on available properties
+    
     const isOwnershipFeature = parsedDescription.pidn || parsedDescription.accountno || parsedDescription.tax_id;
-    const isPublicLandFeature = parsedDescription.surface || parsedDescription.holdagency || parsedDescription.sma_id;
+    const isOwnershipAddress = parsedDescription.msag_zip || parsedDescription.st_name;
+    const isPublicLandFeature = feature.properties.SURFACE || parsedDescription.holdagency || parsedDescription.sma_id;
+    const isPrecinct = feature.properties.objectid || feature.pollingpla
+    const isFEMA = feature.properties.FLD_AR_ID || feature.properties.FLD_ZONE
     const featureId = parsedDescription.pidn || feature.properties.pidn; // Use the unique ID from the feature
+    console.log(isPublicLandFeature)
     return (
       <div key={index} className="feature-details" onMouseEnter={() => setHoveredFeatureId(featureId)} onMouseLeave={() => setHoveredFeatureId(null)}>
         <h3>Feature {index + 1}</h3>
-  
-        {isOwnershipFeature ? (
+        {isOwnershipAddress ? (
+          <>
+            <div><strong>Street Address:</strong> {parsedDescription.st_address || 'N/A'}</div>
+            <div><strong>City:</strong> {parsedDescription.msag_city || 'N/A'}</div>
+            <div><strong>State:</strong> {parsedDescription.state || 'N/A'}</div>
+            <div><strong>ZIP Code:</strong> {parsedDescription.msag_zip || 'N/A'}</div>
+            <div><strong>PIDN:</strong> {parsedDescription.pidn || 'N/A'}</div>
+          </>
+        ) : isOwnershipFeature ? (
           <>
             <div><strong>Parcel:</strong> {parsedDescription.pidn || 'N/A'}</div>
             <div><strong>Account#:</strong> {parsedDescription.accountno || 'N/A'}</div>
@@ -128,7 +164,6 @@ const SidePanel = memo(({
             <div><strong>Tax Classification:</strong> {parsedDescription.accttype || 'N/A'}</div>
             <div><strong>Area (Tax):</strong> {parsedDescription.area_tax ? `${parsedDescription.area_tax} acres` : 'N/A'}</div>
             <div><strong>Area (Calculated):</strong> {parsedDescription.area_calc || 'N/A'}</div>
-            <div><strong>Reception:</strong> {parsedDescription.reception || 'N/A'}</div>
   
             {/* Clerk Record Link */}
             {parsedDescription.clerk_rec && (
@@ -162,10 +197,9 @@ const SidePanel = memo(({
           </>
         ) : isPublicLandFeature ? (
           <>
-            <div><strong>Surface:</strong> {parsedDescription.surface || 'N/A'}</div>
-            <div><strong>Managing Agency:</strong> {parsedDescription.holdagency || 'N/A'}</div>
-            <div><strong>SMA ID:</strong> {parsedDescription.sma_id || 'N/A'}</div>
-            <div><strong>Area (Calculated):</strong> {parsedDescription.area_calc || 'N/A'}</div>
+            <div><strong>Managing Agency:</strong> {feature.properties.SURFACE || 'N/A'}</div>
+            <div><strong>Area:</strong> {feature ? calculateFeatureArea(feature) : 'N/A'}</div>
+            
   
             {/* Description */}
             {parsedDescription.descript && (
@@ -174,7 +208,32 @@ const SidePanel = memo(({
               </div>
             )}
           </>
-        ) : (
+        ) : isPrecinct ? (
+          <>
+            <div><strong>House:</strong> {feature.properties.house || 'N/A'}</div>
+            <div><strong>Polling Place:</strong> {feature.properties.pollingpla || 'N/A'}</div>
+            <div><strong>Precinct:</strong> {feature.properties.precinct || 'N/A'}</div>
+            <div><strong>Senate</strong> {feature.properties.senate || 'N/A'}</div>
+
+  
+            {/* Description */}
+            {parsedDescription.descript && (
+              <div>
+                <strong>Description:</strong> {parsedDescription.descript}
+              </div>
+            )}
+          </>
+        ) : isFEMA ? (
+          <>
+            <div><strong>Flood Zone Code:</strong> {feature.properties.FLD_ZONE || 'N/A'}</div>
+            {/* Description */}
+            {parsedDescription.descript && (
+              <div>
+                <strong>Description:</strong> {parsedDescription.descript}
+              </div>
+            )}
+          </>
+        ): (
           <>
             {/* Render generic attributes if the feature does not match a known type */}
             {Object.keys(parsedDescription).length > 0 ? (
@@ -207,11 +266,90 @@ const SidePanel = memo(({
     }));
   };
 
-  const renderLegend = (layerName) => {
+  const getLayerType = (layerName) => {
+    const lineLayers = ['roads', "roads_easements", 'rivers', 'railways', "zoning_toj_corp_limit"]; // Example line layers
+    const pointLayers = ['precincts_polling_centers', 'control_points_controls']; // Example point layers
+    const adressLayer = []
+    console.log("Layer Name is ", layerName, " and bool is ", layerName == 'ownership_address')
+    if (lineLayers.includes(layerName)) return 'line';
+    if (pointLayers.includes(layerName)) return 'point';
+    if (layerName == 'ownership_address') return 'symbol'
+    return 'fill'; // Default to polygons
+  };
+  
+
+  const renderLegend = (layerName, layerType) => {
     const legendItems = legends[layerName];
-
-    if (!legendItems || legendItems.length === 0) return null;
-
+    const legendStyle = {
+      display: 'inline-block',
+      marginLeft: '8px',
+      border: '1px solid #000', // Black outline for visibility
+    };
+    
+    if (layerType === 'symbol') {
+      // **Symbol Layer (Ownership Address) → Pin Icon**
+      return (
+        <img
+          src="/pin_better.png"  // Path to your custom pin icon
+          alt="Pin Symbol"
+          style={{
+            width: '16px',  // Adjust for small size
+            height: '16px',
+          }}
+        />
+      );
+    }
+    if ((!legendItems || legendItems.length === 0)) {
+      console.warn(`No legend found for layer: ${layerName}`);
+      return null; // Don't render anything if there's no legend
+    }
+    
+    if (legendItems.length === 1) {
+      const item = legendItems[0];
+  
+      if (layerType === 'fill') {
+        // **Polygon Layer → Colored Square**
+        return (
+          <span
+            style={{
+              ...legendStyle,
+              width: '14px',
+              height: '14px',
+              backgroundColor: item.color,
+              opacity: item.opacity !== undefined ? item.opacity : 1,
+            }}
+          />
+        );
+      } else if (layerType === 'line') {
+        // **Line Layer → Horizontal Line**
+        return (
+          <span
+            style={{
+              ...legendStyle,
+              width: '24px',
+              height: '3px',
+              backgroundColor: item.color,
+              display: 'inline-block',
+            }}
+          />
+        );
+      } else if (layerType === 'point') {
+        // **Point Layer → Circle (or Icon if available)**
+        return (
+          <span
+            style={{
+              ...legendStyle,
+              width: '10px',
+              height: '10px',
+              backgroundColor: item.color,
+              borderRadius: '50%',
+              display: 'inline-block',
+            }}
+          />
+        );
+      } 
+    }
+  
     return (
       <div className="legend-container">
         <button onClick={() => toggleLegend(layerName)} className="legend-toggle">
@@ -303,7 +441,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -333,7 +471,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -367,7 +505,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -401,7 +539,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -431,7 +569,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -461,7 +599,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -491,7 +629,7 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
@@ -520,12 +658,42 @@ const SidePanel = memo(({
                               {layerNameMappings[layerName] || layerName}
                             </span>
                           </label>
-                          {renderLegend(layerName)}
+                          {renderLegend(layerName, getLayerType(layerName))}
                         </li>
                       ))}
                     </ul>
                   )}
                 </div>
+                {/* Natural Hazards Layers */}
+                <div className="layer-category">
+                  <button onClick={() => toggleSection('NaturalHazards')}>
+                    {isNaturalHazardsOpen ? '-' : '+'} Natural Hazards
+                  </button>
+                  {isNaturalHazardsOpen && (
+                    <ul>
+                      {['FEMA_updated'].map((layerName) => (
+                        <li key={layerName}>
+                          <label>
+                            <input
+                              type="checkbox"
+                              checked={layerStatus[layerName] || false}
+                              onChange={() => handleLayerSelection(layerName)}
+                            />
+                            <span
+                              style={{
+                                textDecoration: topLayer === layerName ? 'underline' : 'none',
+                              }}
+                            >
+                              {layerNameMappings[layerName] || layerName}
+                            </span>
+                          </label>
+                          {renderLegend(layerName, getLayerType(layerName))}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+
 
               </div>
             )}
@@ -535,12 +703,14 @@ const SidePanel = memo(({
               {/* Fixed header for Information and button */}
               <div className="info-header">
                 <h2>Information</h2>
-                <button
-                  className="report-builder-button"
-                  onClick={() => onReportBuilderClick(selectedFeature)}
-                >
-                  See Selected Features in Report Builder
-                </button>
+                <div className="report-builder-container">
+                  <button
+                    className="report-builder-button"
+                    onClick={() => onReportBuilderClick(selectedFeature)}
+                  >
+                    See Features in Report Builder
+                  </button>
+                </div>
               </div>
               {/* Scrollable content */}
               <div className="info-content">

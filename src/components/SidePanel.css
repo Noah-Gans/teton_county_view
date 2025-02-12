@@ -20,8 +20,7 @@
 .side-panel.closed {
   transform: translateX(100%);
 }
-label {
-}
+
 
 .legend {
   list-style: none;
@@ -32,7 +31,44 @@ label {
   margin-top: 5px;
   margin-left: 20px;
 
+
 }
+
+/* Style the container */
+.report-builder-container {
+  display: flex;
+  justify-content: center; /* Centers the button */
+  margin: auto;
+  margin-top: 15px;
+  margin-right: 20px;
+  margin-left: 20px;
+
+   /* Adds spacing above */
+}
+
+/* Style the button */
+.report-builder-button {
+  background-color: #006b45; /* Match green theme */
+  color: white;
+  padding: 2px 10px;
+  font-size: 14px;
+  border: 2px solid black;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Hover effect */
+.report-builder-button:hover {
+  background-color: #9d7715; /* Darker green on hover */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Add a hover effect */
+}
+
+/* Optional: If you want the button to expand on hover */
+.report-builder-button:active {
+  transform: scale(0.98); /* Slight press effect */
+}
+
 
 .legend-toggle {
   background-color: transparent;

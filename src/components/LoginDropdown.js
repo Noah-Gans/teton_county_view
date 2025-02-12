@@ -66,51 +66,44 @@ const LoginDropdown = () => {
         <div className="dropdown-menu">
           {user ? (
             <>
-              <div className="dropdown-item">Email: {user.email}</div>
+              <div className="dropdown-item">{user.email}</div>
 
-              {/* Show 'Manage Subscription' only if subscription is active */}
               {subscriptionStatus === "active" && (
-                <button className="dropdown-item" onClick={handleManageSubscription}>
+                <button className="dropdown-button" onClick={handleManageSubscription}>
                   Manage Subscription
                 </button>
               )}
+
               {(subscriptionStatus === "none" || subscriptionStatus === "canceled") && (
-  <button
-    className="dropdown-item"
-    onClick={async () => {
-      try {
-        const functions = getFunctions();
-        const createCheckoutSession = httpsCallable(functions, "createCheckoutSession");
+                <button
+                  className="dropdown-button resubscribe-button"
+                  onClick={async () => {
+                    try {
+                      const functions = getFunctions();
+                      const createCheckoutSession = httpsCallable(functions, "createCheckoutSession");
+                      const result = await createCheckoutSession({
+                        email: user.email,
+                        userId: user.uid,
+                      });
+                      window.location.href = result.data.url;
+                    } catch (err) {
+                      console.error("Error re-subscribing:", err);
+                      alert("Unable to start subscription. Please try again later.");
+                    }
+                  }}
+                >
+                  Subscribe
+                </button>
+              )}
 
-        // Call the existing function with the user’s data
-        const result = await createCheckoutSession({
-          email: user.email, 
-          userId: user.uid 
-        });
-
-        const { url } = result.data;
-        window.location.href = url; // Off to Stripe Checkout
-      } catch (err) {
-        console.error("Error re-subscribing:", err);
-        alert("Unable to start subscription. Please try again later.");
-      }
-    }}
-  >
-    Re-subscribe
-  </button>
-)}
-
-              <button className="dropdown-item" onClick={handleLogout}>
+              <button className="dropdown-button logout-button" onClick={handleLogout}>
                 Sign Out
               </button>
             </>
           ) : (
-            <div>
-              {/* If not logged in, link to /login or /signup */}
-              <a href="/login" className="dropdown-item">
-                Sign In / Sign Up
-              </a>
-            </div>
+            <a href="/login" className="dropdown-item">
+              Sign In / Sign Up
+            </a>
           )}
         </div>
       )}
