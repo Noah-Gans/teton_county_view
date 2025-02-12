@@ -1,6 +1,6 @@
 {
   "files": {
-    "main.css": "/static/css/main.8086919f.css",
+    "main.css": "/static/css/main.ca3eb462.css",
     "main.js": "/static/js/main.e1a6394d.js",
     "static/media/tutorial.png": "/static/media/tutorial.b17a3d6c54ae5f0011a7.png",
     "static/media/Map with annotations.jpg": "/static/media/Map with annotations.5a8b1dd6b567cf3a5911.jpg",
@@ -17,11 +17,11 @@
     "static/media/zoo.jpg": "/static/media/zoo.a314123a620beec465d7.jpg",
     "static/media/Basic side panel.jpg": "/static/media/Basic side panel.777b462b84c9eea611a1.jpg",
     "index.html": "/index.html",
-    "main.8086919f.css.map": "/static/css/main.8086919f.css.map",
+    "main.ca3eb462.css.map": "/static/css/main.ca3eb462.css.map",
     "main.e1a6394d.js.map": "/static/js/main.e1a6394d.js.map"
   },
   "entrypoints": [
-    "static/css/main.8086919f.css",
+    "static/css/main.ca3eb462.css",
     "static/js/main.e1a6394d.js"
   ]
 }
