@@ -87,10 +87,11 @@ const Login = () => {
               <small onClick={() => setShowReset(true)}>Forgot password?</small>
             </p>
 
-            {/* Sign Up Link */}
-            <p className="register-link">
-              Need an account? <Link to="/signup">Sign Up</Link>
-            </p>
+            <div className="register-container">
+              <p className="register-text">Need an account?</p>
+              <Link to="/signup" className="signup-button">Sign Up</Link>
+            </div>
+
           </>
         ) : (
           // Forgot password form

@@ -58,7 +58,7 @@ const SidePanel = memo(({
   const handleLayerSelection = (layerName) => {
     // Toggle the layer visibility using setLayerStatus
     setLayerStatus(layerName);
-      
+    console.log("Oh Noooo!")
     // Update the layer order based on the new status of the layer
     setLayerOrder((prevOrder) => {
       // Determine if the layer is being toggled on or off
@@ -143,6 +143,7 @@ const SidePanel = memo(({
     const isFEMA = feature.properties.FLD_AR_ID || feature.properties.FLD_ZONE
     const featureId = parsedDescription.pidn || feature.properties.pidn; // Use the unique ID from the feature
     console.log(isPublicLandFeature)
+    console.log(feature.properties)
     return (
       <div key={index} className="feature-details" onMouseEnter={() => setHoveredFeatureId(featureId)} onMouseLeave={() => setHoveredFeatureId(null)}>
         <h3>Feature {index + 1}</h3>
@@ -160,6 +161,7 @@ const SidePanel = memo(({
             <div><strong>Account#:</strong> {parsedDescription.accountno || 'N/A'}</div>
             <div><strong>Tax ID:</strong> {parsedDescription.tax_id || 'N/A'}</div>
             <div><strong>Owner:</strong> {parsedDescription.owner || 'N/A'}</div>
+            <div><strong>Physical Address</strong> {feature.properties.st_address || 'N/A'}</div>
             <div><strong>Mail Addr:</strong> {parsedDescription.address ? `${parsedDescription.address}, ${parsedDescription.owner_city}, ${parsedDescription.owner_state}` : 'N/A'}</div>
             <div><strong>Tax Classification:</strong> {parsedDescription.accttype || 'N/A'}</div>
             <div><strong>Area (Tax):</strong> {parsedDescription.area_tax ? `${parsedDescription.area_tax} acres` : 'N/A'}</div>
@@ -255,8 +257,8 @@ const SidePanel = memo(({
   const onReportBuilderClick = () => {
     console.log("Clicked")
     setIsFilterTriggered(true)
-    setActiveTab('print');
-    navigate('/print');
+    setActiveTab('report');
+    navigate('/report');
   }
   
   const toggleLegend = (layerName) => {

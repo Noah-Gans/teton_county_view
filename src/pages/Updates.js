@@ -12,7 +12,7 @@ const Updates = () => {
         &larr; Back
       </button>
       <h1>Latest Teton County GIS Features & Updates</h1>
-      <h2>Please Contact Me if You Have Questions About This Teton County GIS Service</h2>
+      <h2> Contact Me With Questions and Ideas </h2>
       <div className="updates-scroll-box">
         <div className="update-item">
           <h3>Feature Features</h3>
@@ -38,7 +38,29 @@ const Updates = () => {
         </div>
         <hr className="update-divider" />
           <div className="update-item">
-          <h3>Teton County GIS 1.01 Release</h3>
+          <h3>Teton County GIS 2.0.0 Release</h3>
+          <h4>October 12th, 2024</h4>
+          <p>Third Release: Massive Update               <br></br>
+          Fundamentally changed the way spatial data is visualized to increase speed and enable mobile compatibility. The app is now using vector tiles to efficiently display all layers and enable selection. On top of this, report builder has been added and integrated into the selection of parcels allowing users to select ownership parcels of interest and immediately open their property, tax, and clerk details in a report and even download the report. At the moment the backend report building is not 100% accurate but will improve through community input and time. Most of it is an outcome of the massive computation and time overhead to scrape every parcel’s county pages. The report builder has massive potential and will continue to improve. In this update multi select has also been added allowing users to select multiple parcels at once. New layers have been added, and their styles have been updated. Search got a massive overhaul with a complete user interface redesign and the ability to select multiple search results and map all selected results. The entire account management and payment portals were also added during this time.   </p>          
+          <ul>
+            <li>
+              <strong>Map</strong>: Added road layer styling. I tried to match that which was conventional and matched the Wyoming state road map and the WYDOT. Legend added too. 
+           </li>
+            <li>
+              <strong>Search</strong>: No Change from 1.0
+            </li>
+            <li>
+            <strong>Report Builder</strong>: Been putting a ton of hours to get this feature up. I believe it will certainly establish this GIS platform as an overall better service.  The report builder will, in my ideal implementation, allow users to build reports of all the information the county has on parcels besides the clerk data. This means you could build a report of all the properties in the Rafter J, what their property value is, how much have they paid in tax, what type of structures are there. It would allow you to know the average square footage of homes in different neighborhoods, or the change in building square footage over time. I’ve built the scraper but there will be many more scrips to process the raw data so that it is in it's most valuable form. 
+            </li>
+            <li>
+            <strong>Print</strong>: Not so inspiring of a goal right now so no updates. Please tell me if this has valuable. Right now pouring time into report builder.            
+            </li>
+          
+          </ul>
+        </div>
+        <hr className="update-divider" />
+          <div className="update-item">
+          <h3>Teton County GIS 1.0.1 Release</h3>
           <h4>October 12th, 2024</h4>
           <p>Second Release: Added styling for different roads and the corresponding ledged. Completely redid the landing page, tutorial, and this updates page. Lots of work on backend for the report builder. but nothing that is visible here. Scraping all the detailed plat data and plat tax data is slow so it may be a weekly update because one scape of all plots is </p>
           <ul>
@@ -59,7 +81,7 @@ const Updates = () => {
         </div>
         <hr className="update-divider" />
         <div className="update-item">
-          <h3>Teton County GIS 1.0 Release</h3>
+          <h3>Teton County GIS 1.0.0 Release</h3>
           <h4>October 6th, 2024</h4>
           <p>First Release: Includes map and search features. Print and advanced search yet to be implemented.</p>
           <ul>

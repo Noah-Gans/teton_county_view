@@ -154,7 +154,7 @@
   /*background-color: rgba(255, 255, 255, 0.6); /* Whitish-gray background with some transparency */
   /*backdrop-filter: blur(1px); /* Apply a blur effect to the background */
 
-  height: calc(100vh - 230px);
+  height: calc(100dvh - 250px);
 }
 
 .side-panel h2 {
@@ -193,3 +193,14 @@
   border: 1px solid #000;
 }
 
+@media (max-width: 768px) {
+  .side-panel {
+    
+    height: calc(100dvh - 150px); /* Subtract the height of the ToolPanel */
+    
+  }
+  .report-builder-container {
+    display: none !important; /* Hide on mobile */
+  }
+  
+}

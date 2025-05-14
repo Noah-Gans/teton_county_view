@@ -36,23 +36,31 @@
 
 /* Add background image (optional) */
 .signup-left::before {
-  background: url('/public/teton.jpg') no-repeat center;
   content: "";
   position: absolute;
   top: 0; left: 0;
   width: 100%;
   height: 100%;
+  background: linear-gradient(rgba(19, 63, 48, .2), rgba(19, 63, 48, 0)),
+              url('/public/signup.png') no-repeat center center;
   background-size: cover;
-  opacity: 0.15; /* Subtle overlay */
-  z-index: 0;
+  z-index: 0; /* Keep it behind the content */
+
 }
 
-/* Left Content */
+
+
 .signup-left-content {
   position: relative;
   z-index: 2;
-  max-width: 500px;
+  text-align: center;
+  max-width: 600px;
+  background: rgba(19, 63, 48, 0.55); /* Optional: adds contrast box */
+  padding: 30px;
+  border-radius: 12px;
+  backdrop-filter: blur(1px); /* Optional: glass effect */
 }
+
 
 /* Title */
 .signup-left h1 {
@@ -119,6 +127,29 @@
 .signup-left small {
   font-size: 14px;
   color: #f2f2f2;
+}
+.company-pricing-btn {
+  margin-top: 0px;
+  padding: 12px 20px;
+  background: #006b4600; /* dark green */
+  color: #FFD700;       /* yellow text */
+  font-weight: bold;
+  border: solid white;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 16px;
+  box-shadow: 0px 3px 8px rgba(0, 0, 0, 0.2);
+}
+
+.company-pricing-btn:hover {
+  background: #009f62;
+  transform: scale(1.05);
+}
+
+.discount-highlight {
+  color: #FFD700;
+  font-weight: bold;
 }
 
 
@@ -387,3 +418,107 @@
   text-align: center;
 }
 
+/* ✅ Responsive adjustments for mobile */
+@media (max-width: 768px) {
+
+  .signup-page {
+    flex-direction: column; /* Stack left and right sections */
+    height: 100dvh;
+    width: 100dvw; /* Full viewport width */
+    padding: 0;
+    overflow-y: auto; /* Allow scrolling if needed */
+    overflow-x: hidden; /* ✅ Prevent horizontal scrolling */
+    display: flex;
+    align-items: center;
+  }
+  
+  /* ✅ Left and Right sections should take full width of parent */
+  .signup-left, .signup-right {
+    flex: none;
+    width: 100%; /* ✅ Ensures no extra width */
+    max-width: 100dvw; /* ✅ Prevents exceeding viewport */
+    border-radius: 10px;
+    text-align: center;
+  }
+  
+  /* ✅ Remove border-radius since it's full width */
+  .signup-left {
+    border-radius: 10px 10px 0 0;
+  }
+  
+  .signup-right {
+    border-radius: 0 0 10px 10px;
+  }
+
+  /* ✅ Adjust text sizes for better readability */
+  .signup-left h1 {
+    font-size: 28px;
+  }
+
+  .subheader-signup {
+    font-size: 18px;
+  }
+
+  .features-title {
+    font-size: 20px;
+  }
+
+  .signup-left ul li {
+    font-size: 16px;
+  }
+  /* ✅ Each step should be full width */
+  .signup-step {
+    width: 100%;
+    max-width: 500px; /* Keeps form readable on larger screens */
+    padding: 20px;
+    margin-bottom: 20px; /* Adds space between steps */
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.97);
+    box-shadow: 0px 3px 10px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(0, 0, 0, 0.1);
+    text-align: center;
+  }
+  
+  /* ✅ Make input fields take full width */
+  .signup-input-container {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  /* ✅ Adjust input styles */
+  .signup-input-container input {
+    width: 90%;
+    padding: 14px;
+    font-size: 18px;
+    text-align: center;
+  }
+  
+  /* ✅ Ensure the Create Account button is below the inputs */
+  .create-account-btn {
+    width: 100%;
+    font-size: 18px;
+    padding: 16px;
+    margin-top: 20px; /* Adds spacing between inputs and button */
+    display: block;
+  }
+  
+  /* ✅ Move primary button below email verification */
+  .primary-button {
+    width: 90%;
+    font-size: 18px;
+    padding: 14px;
+    margin-top: 15px;
+  }
+  
+  /* ✅ Adjust verification message layout */
+  .verification-check, .verified-message {
+    width: 90%;
+    font-size: 16px;
+    padding: 14px;
+    margin: auto;
+    margin-bottom: 15px;
+  }
+}

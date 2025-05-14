@@ -34,7 +34,7 @@ exports.createCheckoutSession = functions.https.onCall(async (data, context) => 
       customer_email: email,
       line_items: [
         {
-          price: "price_1QjmscLhg9Kp46ldxHwZ3aRi",
+          price: "price_1RM9MaLhg9Kp46ldUwF16Y8t",
           quantity: 1,
         },
       ],
@@ -48,6 +48,7 @@ exports.createCheckoutSession = functions.https.onCall(async (data, context) => 
     
       // 2) Attach the user ID to the Subscription object
       subscription_data: {
+        trial_period_days: 14, // ✅ ✅ This is the correct way now
         metadata: {
           firebaseUserId: userId,
         },
@@ -72,7 +73,7 @@ app.use(
   })
 );
 
-app.post("/webhook", async (req, res) => {
+app.post("/", async (req, res) => {
   const sig = req.headers["stripe-signature"];
   let event;
 

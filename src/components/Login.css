@@ -65,7 +65,8 @@
 .login-logo {
   width: 350px;
   height: auto;
-  margin-bottom: -40px;
+  margin-bottom: -100px;
+  margin-top: -50px;
 }
 
 /* Main title */
@@ -76,12 +77,6 @@
   text-transform: uppercase;
 }
 
-/* Subtitle */
-.title-sub {
-  font-size: 18px;
-  font-weight: normal;
-  color: white;
-}
 
 /* Error & success messages */
 .error-message, .success-message {
@@ -91,8 +86,16 @@
 .error-message { color: red; }
 .success-message { color: green; }
 
+
+/* Change placeholder text color */
+.login-input::placeholder {
+  color: rgb(255, 255, 255); /* Red with slight transparency */
+  font-weight: 500;
+  text-align: center; /* Keep centered */
+}
 /* Input fields */
 .login-input {
+  border: solid white;
   width: 90%;
   padding: 12px;
   margin: 10px 0;
@@ -101,7 +104,7 @@
   font-size: 16px;
   transition: all 0.3s ease-in-out;
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: rgb(255, 255, 255);
   text-align: center;
 }
 
@@ -153,21 +156,43 @@
 .reset-email-btn:hover {
   background: #b30000;
 }
+/* Container for the register section */
+.register-container {
+  margin-top: 20px;
+  text-align: center;
+}
 
-/* Register link */
-.register-link {
-  display: block;
-  margin-top: 15px;
+/* Text above the button */
+.register-text {
   color: white;
   font-weight: bold;
-  text-decoration: none;
-  transition: color 0.3s ease-in-out;
+  margin-bottom: 10px;
 }
 
-/* Register hover effect */
-.register-link:hover {
-  color: rgb(164, 155, 155);
+/* Sign Up button styling */
+.signup-button {
+  display: inline-block;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #9d7715, #71591c);
+  color: white;
+  font-weight: bold;
+  border-radius: 6px;
+  text-decoration: none;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  border: solid #006b45;
+
 }
+
+/* Hover effect */
+.signup-button:hover {
+  background: #71591c;
+  border: solid white;
+  transform: scale(1.05);
+  color: white;
+}
+
+
 
 /* Links (Forgot Password / Sign Up) */
 .login-link {
@@ -185,4 +210,80 @@
 /* Hover effect for login links */
 .login-link small:hover {
   color: rgb(200, 200, 200);
+}
+
+/* Responsive adjustments for mobile */
+@media (max-width: 768px) {
+  
+  /* Adjust fullscreen overlay */
+  .login-page {
+    width: 90vw; /* Full viewport width */
+    height: 100dvh; /* Full dynamic viewport height */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px; /* Add padding to prevent edge clipping */
+  }
+
+  .login-logo {
+    width: 100px;
+    height: auto;
+    margin-bottom: -40px;
+  }
+  
+  /* Centered login container */
+  .login-container {
+    width: 90%; /* Make it more compact */
+    max-width: 350px; /* Limit width on larger phones */
+    padding: 30px; /* Slightly less padding */
+    border-radius: 12px;
+  }
+
+  /* Close button size increase for touch-friendliness */
+  .close-login {
+    width: 42px;
+    height: 42px;
+    font-size: 20px;
+    top: 8px;
+    right: 10px;
+  }
+
+  /* Adjust title and subtitle sizes */
+  .title-main {
+    font-size: 20px; /* Slightly smaller */
+  }
+
+  .title-sub {
+    font-size: 16px;
+  }
+
+  /* Adjust input fields for better usability */
+  .login-input {
+    width: 90%;
+    padding: 14px;
+    font-size: 18px; /* Bigger text */
+  }
+
+  /* Buttons should be easier to press */
+  .login-btn {
+    width: 100%; /* Full width */
+    font-size: 18px;
+    padding: 16px;
+  }
+
+  /* Adjust register and login links */
+  .login-link small {
+    font-size: 16px;
+  }
+
+  .register-link {
+    font-size: 16px;
+  }
+
+  /* Reset password button */
+  .reset-email-btn {
+    width: 100%;
+    font-size: 16px;
+    padding: 14px;
+  }
 }

@@ -1,413 +1,368 @@
-import React, { useCallback, useContext, useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { DataContext } from '../assets/DataContext';
-import './Print.css';
+import React, { useEffect, useState } from 'react';
 import { useMapContext } from './MapContext';
-import booleanPointInPolygon from '@turf/boolean-point-in-polygon';
-import ReportTable from './ReportTable'; // path depends on your file structure
+import './Print.css';
 
-const Reports = () => {
-  const { setGlobalActiveTab, startPolygonDraw, polygonData, passPolygonToReportBuilder, toggleLayerVisibility, startGeoFilter, clearGeoFilter, selectedColumns, toggleColumn, selectedFeature, isFilterTriggered, setIsFilterTriggered } = useMapContext();
-  const {reportData, loadingReport } = useContext(DataContext);
-  const [filteredRows, setFilteredRows] = useState([]); // State for filtered rows
-  const [page, setPage] = useState(0);
-  const [visibleColumns, setVisibleColumns] = useState([]); // Track visible columns
-  const rowsPerPage = 50; // Number of rows per page
-  const navigate = useNavigate();
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: null }); // Sorting state
-  const [filters, setFilters] = useState({}); // Filtering state
+export default function PrintOverlay({ onClose }) {
+  const {
+    setPaperSize,
+    setIsPrinting,
+    addNote,
+    addArrowShape, // ✅ Add this
+    clearPrintElements,
+    addLegend,
+    addCompass,
+    addPin,
+    addRectangle,
+    addDiamond,
+    addTriangle,
+    selectedPrintElement,
+    updatePrintElement,
+    setSelectedPrintElement
+  } = useMapContext();
+  const [isOpen, setIsOpen] = useState(true);
+  const [orientation, setOrientation] = useState('portrait');
+  const [toolType, setToolType] = useState('note');
 
-  // Parse the file content
-  const lines = reportData.split('\n');
-  const headers = lines[0]?.split('|') || []; // Use the first line as headers
-  const [dropdownState, setDropdownState] = useState({
-    generalPropertyInfo: false,
-    propertyDetails: false,
-    taxInformation: false,
-  });
-  // Parse rows with dynamic column mapping
-  const rows = lines.slice(1).map((line) => {
-    const columns = line.split('|');
-    const row = {
-      PIDN: columns[0],
-      center: columns[1]
-        ? columns[1].split(',').map(coord => parseFloat(coord)) // Parse center as [longitude, latitude]
-        : undefined,
-    };
-
-    // Dynamically add remaining columns
-    headers.slice(2).forEach((header, index) => {
-      row[header] = columns[index + 2]; // Offset by 2 to account for PIDN and center
-    });
-
-    return row;
-  });
+  useEffect(() => {
+    console.log('Entering print mode');
+    setIsPrinting(true);
+    setPaperSize('portrait');
+    document.body.classList.add('print-portrait', 'print-preview-active');
+    // Apply styles that normally get injected on print
+    const isPortrait = true; // default entry mode
   
-  // Pagination logic
-  const totalPages = Math.ceil(
-    (filteredRows.length > 0 ? filteredRows.length : rows.length) / rowsPerPage
-  );  
-  const currentRows = (filteredRows.length > 0 ? filteredRows : rows).slice(
-    page * rowsPerPage,
-    (page + 1) * rowsPerPage
-  );  
-  // Define grouped columns
-  const toggleDropdown = useCallback((group) => {
-    setDropdownState((prev) => ({
-      ...prev,
-      [group]: !prev[group],
-    }));
-  }, []);
-
-  const handleSort = (key) => {
-    let direction = 'ascending';
-    if (sortConfig.key === key && sortConfig.direction === 'ascending') {
-      direction = 'descending';
-    }
-    setSortConfig({ key, direction });
+    const scrollWrapper = document.querySelector('.print-scroll-wrapper');
+    const map = document.getElementById('map');
   
-    const sortedRows = [...filteredRows].sort((a, b) => {
-      if (a[key] < b[key]) return direction === 'ascending' ? -1 : 1;
-      if (a[key] > b[key]) return direction === 'ascending' ? 1 : -1;
-      return 0;
-    });
-  
-    setFilteredRows(sortedRows);
-  };
-
-  const parsePidnFromDescription = (description) => {
-    if (!description) {
-      return null;
+    if (scrollWrapper) {
+      scrollWrapper.style.width = isPortrait ? '8.5in' : '11in';
+      scrollWrapper.style.height = isPortrait ? '10in' : '8.5in';
+      scrollWrapper.style.overflow = 'hidden';
     }
   
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(description, 'text/html');
-    const rows = doc.querySelectorAll('tr');
+    if (map) {
+      map.style.width = isPortrait ? 'calc(8.5in - 40px)' : '10in';
+      map.style.height = isPortrait ? '10in' : '7.5in';
+      map.style.transform = 'none';
+    }
   
-    for (const row of rows) {
-      const th = row.querySelector('th')?.textContent?.trim().toLowerCase();
-      const td = row.querySelector('td')?.textContent?.trim();
-      if (th === 'pidn') {
-        return td;
+    // Center scroll manually
+    setTimeout(() => {
+      if (scrollWrapper) {
+        scrollWrapper.scrollLeft = scrollWrapper.scrollWidth / 2 - scrollWrapper.clientWidth / 2;
       }
+    }, 50);
+  
+    return () => {
+      console.log('Exiting print mode');
+      setIsPrinting(false);
+      setPaperSize('full');
+      document.body.classList.remove('print-landscape', 'print-portrait', 'print-preview-active');
+  
+      // Reset inline styles (cleanup)
+      if (scrollWrapper) {
+        scrollWrapper.style.width = '';
+        scrollWrapper.style.height = '';
+        scrollWrapper.style.overflow = '';
+      }
+      if (map) {
+        map.style.width = '';
+        map.style.height = '';
+        map.style.transform = '';
+      }
+    };
+  }, []);
+  // Switch orientation & paperSize
+  const handleChangeOrientation = (e) => {
+    const newOrientation = e.target.value;
+    setOrientation(newOrientation);
+    setPaperSize(newOrientation); // 'portrait' or 'landscape'
+     // Add class to <body> to control @page orientation
+    if (newOrientation === 'landscape') {
+      document.body.classList.add('print-landscape');
+      document.body.classList.remove('print-portrait');
+    } else {
+      document.body.classList.add('print-portrait');
+      document.body.classList.remove('print-landscape');
     }
-  
-    return null; // Return null if pidn not found
+    setTimeout(() => {
+      const scrollWrapper = document.querySelector('.print-scroll-wrapper');
+      if (scrollWrapper) scrollWrapper.scrollLeft = 0;
+    }, 50);
   };
-
-  const handleFilter = (key, value) => {
-    setFilters((prev) => ({ ...prev, [key]: value }));
+  const handlePrint = () => {
+    setSelectedPrintElement(null);
+    const old = document.getElementById('dynamic-print-style');
+    if (old) old.remove();
   
-    const filtered = rows.filter((row) => {
-      return Object.entries(filters).every(([filterKey, filterValue]) => {
-        return row[filterKey]?.toString().toLowerCase().includes(filterValue.toLowerCase());
-      });
-    });
-  
-    setFilteredRows(filtered);
+    const style = document.createElement('style');
+    style.id = 'dynamic-print-style';
+    style.textContent = `
+      @page {
+        size: ${orientation === 'portrait'
+          ? '8.5in 11in portrait'
+          : '11in 8.5in landscape'};
+        margin: 0;
+      }
+    `;
+    document.head.appendChild(style);
+    setTimeout(() => window.print(), 50);
   };
   
-  const generalPropertyInfoColumns = [
-    "PIDN",
-    "Account",
-    "Property Owner(s)",
-    "Mailing Address",
-    "Tax ID",
-  ];
-
-  const propertyDetailsColumns = [
-    "Actual Market Value Total",
-    "Actual Market Value Land",
-    "Actual Market Value Improvements",
-    "Market Value Breakdown",
-    "Property Class",
-    "Number Of Developments",
-    "Legal Description",
-  ];
-
-const taxInformationColumns = [
-  
-  "Tax District",
-  "First Half Levied",
-  "First Half Interest",
-  "First Half Fees",
-  "First Half Bill",
-  "First Half Amount Paid",
-  "First Half Amount Owed",
-  "First Half Paid",
-  "Second Half Levied",
-  "Second Half Interest",
-  "Second Half Fees",
-  "Second Half Bill",
-  "Second Half Amount Paid",
-  "Second Half Amount Owed",
-  "Second Half Paid",
-  "Total Levied",
-  "Total Interest",
-  "Total Fees",
-  "Total Bill",
-  "Total Amount Paid",
-  "Total Amount Owed",
-  "Mill Levy",
-  "Tax Payment History",
-  "Has Mortgage"
-];
-
-  // Combine columns without redundancy
- 
   
 
-  // Toggle column visibility
-
-  useEffect(() => {
-    console.log("Selected Columns from MapContext:", selectedColumns);
-  }, [selectedColumns]);
-  useEffect(() => {
-    if (polygonData) {
-      console.log('Using Polygon in Reports:', polygonData);
-    }
-  }, [polygonData]);
-
-
-
-const handleDownload = () => {
-  console.log("Filtered Rows:", filteredRows);
-  console.log("Selected Columns:", selectedColumns);
-  const csvContent = generateCSV();
-  if (!csvContent) return; // Stop if there's no data
-
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `filtered_report.csv`; // File name
-  link.click();
-
-  URL.revokeObjectURL(url); // Clean up URL object
-};
-
-useEffect(() => {
-  if (isFilterTriggered && selectedFeature.length > 0) {
-    console.log("Filtering rows based on selected features:", selectedFeature);
-
-    // Extract PIDNs from selectedFeatures
-    const selectedPidns = selectedFeature.map(
-      (feature) => parsePidnFromDescription(feature.properties?.description)
-    );
-
-    // Filter rows based on selected PIDNs
-    const filtered = rows.filter((row) => selectedPidns.includes(row.PIDN));
-    setFilteredRows(filtered);
-    console.log("Filtered rows:", filtered);
-
-    // Reset the filter trigger after applying the filter
-    setIsFilterTriggered(false);
-  }
-}, [isFilterTriggered, selectedFeature, rows]);
-
-const generateCSV = () => {
-
-  if (!selectedColumns.length) {
-    alert('No data available to download.');
-    return '';
-  }
-
-
-  const dataToDownload = filteredRows.length ? filteredRows : rows;
-
-  // Helper function to safely wrap a value in double quotes and escape internal quotes
-  const escapeValue = (value) => {
-    if (value === null || value === undefined) return '';
-    const stringValue = value.toString();
-    return `"${stringValue.replace(/"/g, '""')}"`; // Escape double quotes
-  };
-
-  // Generate header row with selected columns
-  const csvHeader = selectedColumns.map(escapeValue).join(',');
-
-  // Generate rows for each filtered row
-  // Generate CSV rows
-  const csvRows = dataToDownload.map((row) =>
-    selectedColumns.map((col) => escapeValue(row[col] || '')).join(',')
-  );
-
-  // Combine header and rows into a CSV string
-  return [csvHeader, ...csvRows].join('\n');
-};
-
-
-
-  // Clear GeoFilter
-  const handleClearGeoFilter = () => {
-    clearGeoFilter(); // Clear GeoFilter in MapContext
-    localStorage.removeItem('polygonData'); // Remove stored GeoFilter
-    console.log('GeoFilter cleared');
-  };
-
-  const handleGeoFilter = () => {
-    console.log('Geo Filter button clicked.');
-
-    // Switch to the map tab
-    console.log('Switching to map tab...');
-    setGlobalActiveTab('map');
-    navigate('/map'); // Navigate to the map route
-
-    // Ensure the ownership layer is visible
-    console.log('Ensuring ownership layer is visible...');
-    toggleLayerVisibility('ownership');
-
-    // Start polygon drawing tool
-    console.log('Starting polygon drawing tool...');
-    startPolygonDraw(true);
+  // Add a new note
+  const handleAddNote = () => {
+    addNote(); // calls the context function that pushes a new note
   };
 
   return (
-    <div className="reports-background-blur">
-      <div className="reports-container">
-        {/* Title */}
-        <div className="reports-title">
-          <h1>Reports</h1>
-        </div>
-  
-        {/* Content Area */}
-        <div className="reports-content">
-          {/* Side Panel */}
-          <div className="report-side-panel">
-            <button className="action-button" onClick={handleDownload}>
-              Download
-            </button>
-            
-            
-            <div className="attribute-dropdown-reports">
-              <h3>Select Attributes</h3>
-
-              <div className="dropdown-group-reports">
+    <div className="print-overlay">
+      <div className={`print-panel ${isOpen ? '' : 'closed'}`}>
+        <button className="toggle-btn" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? '<' : '>'}
+        </button>
+        <div className="content">
+          <div className="tab-buttons">
+            <button className="active">Print Options</button>
+          </div>
+          <div className="tab-content modern-print-panel">
+            <div className="top-actions">
+              <button className="print-button" onClick={handlePrint}>🖨️ Print</button>
+              <div className="orientation-toggle">
                 <button
-                  className="dropdown-header-reports"
-                  onClick={() => toggleDropdown('generalPropertyInfo')}
+                  className={orientation === 'portrait' ? 'selected' : ''}
+                  onClick={() => {
+                    const newOrientation = 'portrait';
+                    setOrientation(newOrientation);
+                    setPaperSize(newOrientation);
+                    document.body.classList.add('print-portrait');
+                    document.body.classList.remove('print-landscape');
+                  }}
                 >
-                  General Property Info {dropdownState.generalPropertyInfo ? '▲' : '▼'}
+                  Portrait
                 </button>
-                {dropdownState.generalPropertyInfo && (
-                  <div className="dropdown-menu-reports">
-                    {generalPropertyInfoColumns.map((column, index) => (
-                      <div key={index} className="dropdown-item-reports" onClick={() => toggleColumn(column)}>
-                        <input type="checkbox" checked={selectedColumns.includes(column)} readOnly />
-                        {column}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Property Details Dropdown */}
-              <div className="dropdown-group-reports">
                 <button
-                  className="dropdown-header-reports"
-                  onClick={() => toggleDropdown('propertyDetails')}
+                  className={orientation === 'landscape' ? 'selected' : ''}
+                  onClick={() => {
+                    const newOrientation = 'landscape';
+                    setOrientation(newOrientation);
+                    setPaperSize(newOrientation);
+                    document.body.classList.add('print-landscape');
+                    document.body.classList.remove('print-portrait');
+                  }}
                 >
-                  Property Details {dropdownState.propertyDetails ? '▲' : '▼'}
+                  Landscape
                 </button>
-                {dropdownState.propertyDetails && (
-                  <div className="dropdown-menu-reports">
-                    {propertyDetailsColumns.map((column, index) => (
-                      <div
-                        key={index}
-                        className="dropdown-item-reports"
-                        onClick={() => toggleColumn(column)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedColumns.includes(column)}
-                          readOnly
-                        />
-                        {column}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-
-              {/* Tax Information Dropdown */}
-              <div className="dropdown-group-reports">
-                <button
-                  className="dropdown-header-reports"
-                  onClick={() => toggleDropdown('taxInformation')}
-                >
-                  Tax Information {dropdownState.taxInformation ? '▲' : '▼'}
-                </button>
-                {dropdownState.taxInformation && (
-                  <div className="dropdown-menu-reports">
-                    {taxInformationColumns.map((column, index) => (
-                      <div
-                        key={index}
-                        className="dropdown-item-reports"
-                        onClick={() => toggleColumn(column)}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedColumns.includes(column)}
-                          readOnly
-                        />
-                        {column}
-                      </div>
-                    ))}
-                  </div>
-                )}
               </div>
             </div>
 
-
-            <div className="selected-attributes">
-              <h3>Selected Attributes</h3>
-              <ul>
-                {selectedColumns.map((column, index) => (
-                  <li key={index}>{column}</li>
-                ))}
-              </ul>
+            <div className="scroll-section">
+            <h4>Add Shape</h4>
+            <div className="scroll-container">
+              <div className="tooltip-wrapper">
+                <button onClick={addRectangle}>⬛</button>
+                <span className="tooltip-text">Rectangle</span>
+              </div>
+              <div className="tooltip-wrapper">
+                <button onClick={addArrowShape}>➡️</button>
+                <span className="tooltip-text">Arrow</span>
+              </div>
+              <div className="tooltip-wrapper">
+                <button onClick={addDiamond}>🔷</button>
+                <span className="tooltip-text">Diamond</span>
+              </div>
+              <div className="tooltip-wrapper">
+                <button onClick={addTriangle}>🔺</button>
+                <span className="tooltip-text">Triangle</span>
+              </div>
+              <div className="tooltip-wrapper">
+                <button onClick={addPin}>📍</button>
+                <span className="tooltip-text">Pin</span>
+              </div>
             </div>
           </div>
-  
-          {/* Main Panel */}
-          <div className="main-panel">
-            <div className="table-container">
-            <ReportTable
-              currentRows={currentRows}
-              selectedColumns={selectedColumns}
-              filters={filters}
-              handleFilter={handleFilter}
-              handleSort={handleSort}
+
+          <div className="scroll-section">
+            <h4>Add Map Elements</h4>
+            <div className="scroll-container">
+              <div className="tooltip-wrapper">
+                <button onClick={addNote}>📝</button>
+                <span className="tooltip-text">Note</span>
+              </div>
+              <div className="tooltip-wrapper">
+                <button onClick={addLegend}>📚</button>
+                <span className="tooltip-text">Legend</span>
+              </div>
+             
+            </div>
+          </div>
+          {/* 🎨 Edit Panel */}
+{/* 🎨 Edit Panel */}
+{selectedPrintElement && ['triangle', 'rectangle', 'diamond', 'pin', 'note', 'arrow'].includes(selectedPrintElement.type) && (
+  <div className="scroll-section">
+    <h4>Edit {selectedPrintElement.type === 'note' ? 'Note' : 'Shape'}</h4>
+    <div className="edit-panel">
+
+      {/* 🟥 Fill Color – only show if not arrow */}
+      {selectedPrintElement.type !== 'arrow' && (
+        <label>
+          Fill Color:
+          <input
+            type="color"
+            value={
+              selectedPrintElement.fill ||
+              (selectedPrintElement.type === 'note' ? '#ffffff' : '#000000')
+            }
+            onChange={(e) =>
+              updatePrintElement({ ...selectedPrintElement, fill: e.target.value })
+            }
+          />
+        </label>
+      )}
+
+      <label>
+        Border Color:
+        <input
+          type="color"
+          value={selectedPrintElement.stroke || '#000000'}
+          onChange={(e) =>
+            updatePrintElement({ ...selectedPrintElement, stroke: e.target.value })
+          }
+        />
+      </label>
+
+      <label>
+        Border Width:
+        <input
+          type="text"
+          inputMode="numeric"
+          value={
+            selectedPrintElement.strokeWidth === undefined
+              ? ''
+              : selectedPrintElement.strokeWidth
+          }
+          onChange={(e) => {
+            const raw = e.target.value;
+            const parsed = parseFloat(raw);
+            updatePrintElement({
+              ...selectedPrintElement,
+              strokeWidth: raw === '' ? undefined : isNaN(parsed) ? 0 : parsed,
+            });
+          }}
+          placeholder="Border width"
+        />
+      </label>
+
+      {/* 🟧 Fill Opacity – only show if not arrow */}
+      {selectedPrintElement.type !== 'arrow' && (
+        <label>
+          Fill Opacity:
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={selectedPrintElement.fillOpacity ?? 1}
+            onChange={(e) =>
+              updatePrintElement({
+                ...selectedPrintElement,
+                fillOpacity: parseFloat(e.target.value),
+              })
+            }
+          />
+        </label>
+      )}
+
+      <label>
+        Border Opacity:
+        <input
+          type="range"
+          min="0"
+          max="1"
+          step="0.01"
+          value={selectedPrintElement.strokeOpacity ?? 1}
+          onChange={(e) =>
+            updatePrintElement({
+              ...selectedPrintElement,
+              strokeOpacity: parseFloat(e.target.value),
+            })
+          }
+        />
+      </label>
+
+      {/* ✍️ Font Options – Only for Note */}
+      {selectedPrintElement.type === 'note' && (
+        <>
+          <label>
+            Font Color:
+            <input
+              type="color"
+              value={selectedPrintElement.fontColor || '#000000'}
+              onChange={(e) =>
+                updatePrintElement({ ...selectedPrintElement, fontColor: e.target.value })
+              }
             />
-            </div>
-            {/* Pagination component */}
-            <div className="pagination">
-              <span>
-                Showing {currentRows.length} of{' '}
-                {filteredRows.length > 0 ? filteredRows.length : rows.length} results
-              </span>
-              <button
-                onClick={() => setPage((prev) => Math.max(prev - 1, 0))}
-                disabled={page === 0}
-              >
-                Previous
-              </button>
-              <span>
-                Page {page + 1} of {totalPages}
-              </span>
-              <button
-                onClick={() => setPage((prev) => Math.min(prev + 1, totalPages - 1))}
-                disabled={page === totalPages - 1}
-              >
-                Next
-              </button>
+          </label>
+
+          <label>
+            Font Size:
+            <input
+              type="number"
+              min="8"
+              max="72"
+              value={selectedPrintElement.fontSize ?? 14}
+              onChange={(e) =>
+                updatePrintElement({ ...selectedPrintElement, fontSize: parseInt(e.target.value) })
+              }
+            />
+          </label>
+
+          <label>
+            Font Family:
+            <select
+              value={selectedPrintElement.fontFamily || 'sans-serif'}
+              onChange={(e) =>
+                updatePrintElement({ ...selectedPrintElement, fontFamily: e.target.value })
+              }
+            >
+              <option value="sans-serif">Sans-serif</option>
+              <option value="serif">Serif</option>
+              <option value="monospace">Monospace</option>
+              <option value="cursive">Cursive</option>
+            </select>
+          </label>
+
+          <label>
+            Text Align:
+            <select
+              value={selectedPrintElement.textAlign || 'left'}
+              onChange={(e) =>
+                updatePrintElement({ ...selectedPrintElement, textAlign: e.target.value })
+              }
+            >
+              <option value="left">Left</option>
+              <option value="center">Center</option>
+              <option value="right">Right</option>
+            </select>
+          </label>
+        </>
+      )}
+
+    </div>
+  </div>
+)}
+
+
+
+            <div className="final-tools">
+              <button onClick={clearPrintElements}>🧹 Clear All</button>
             </div>
           </div>
+
+
         </div>
       </div>
     </div>
   );
-  
-};
-
-export default Reports;
+}

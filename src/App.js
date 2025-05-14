@@ -5,6 +5,7 @@ import Map from './pages/Mapy';
 import Search from './pages/Search';
 import SidePanel from "./components/SidePanel";
 import { DataProvider } from './assets/DataContext';
+import Report from './pages/Report';
 import Print from './pages/Print';
 import MainHeader from './pages/MainHeader';
 import Tutorial from './components/Tutorial'; // Import the new Tutorial page
@@ -24,9 +25,10 @@ function App() {
 
   return (
     <UserProvider> {/* Wrap the app with UserProvider */}
+    <Router>
       <MapProvider>
         <DataProvider>
-          <Router>
+          
             <div className="app-container">
               <LoginDropdown />
               <MainHeader activeTab={activeTab} onTabChange={setActiveTab} />
@@ -49,6 +51,14 @@ function App() {
                     }
                   />
                   <Route
+                    path="/report"
+                    element={
+                      <ProtectedRoute>
+                        <Report />
+                      </ProtectedRoute>
+                    }
+                  />
+                  <Route
                     path="/print"
                     element={
                       <ProtectedRoute>
@@ -63,9 +73,10 @@ function App() {
                 </Routes>
               </div>
             </div>
-          </Router>
+          
         </DataProvider>
       </MapProvider>
+      </Router>
     </UserProvider>
   );
 }

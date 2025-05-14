@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Intro.css';
 import tutorialImage from '../assets/images/tutorial.png';
-import staticImage from '../assets/images/static image.jpg'; // Import the static image for Safari
+import staticImage from '../assets/images/test.svg'; // Import the static image for Safari
 import Tutorial from '../components/Tutorial';
 import ContactForm from '../components/ContactForm';
 import SharePopup from '../components/SharePopup';  // Import the new SharePopup
@@ -21,6 +21,13 @@ const Intro = ({ onStartClick }) => {
   const [isClicked, setIsClicked] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);  // New state for the share popup
   const [loading, setLoading] = useState(false);
+  const [activeCard, setActiveCard] = useState(null);
+  const handleCardClick = (cardId) => {
+    console.log("Clicked card:", cardId);
+    setActiveCard(cardId);
+  };
+    const closeModal = () => setActiveCard(null);
+
   useEffect(() => {
     // Check if the browser is Safari
     const userAgent = navigator.userAgent.toLowerCase();
@@ -28,6 +35,18 @@ const Intro = ({ onStartClick }) => {
     setIsSafari(safari);
   }, []);
 
+  useEffect(() => {
+    if (isShareOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+  
+    // Cleanup on unmount
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isShareOpen]);
   
 
   const handleTutorialClick = () => {
@@ -129,6 +148,16 @@ const handleStripeCheckout = async () => {
   }
 };
 
+useEffect(() => {
+  if (activeCard !== null) {
+    document.body.style.overflow = 'hidden';
+  }
+
+  return () => {
+    document.body.style.overflow = ''; // always unlock on component unmount
+  };
+}, [activeCard]);
+
 
 
 
@@ -154,8 +183,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
   return (
     <div className="intro">
+      {/* Top-left header navigation */}
+      <div className="intro-header-nav">
+        <button className="header-button" onClick={() => navigate('/updates')}>Updates</button>
+        <a className="header-button" href="mailto:noahgans@tetoncountygis.com" target="_blank" rel="noopener noreferrer">Contact</a>
+        {/* Optional Share button */}
+        <button className="header-button" onClick={handleOpenShare}>Share</button>
+      </div>
+
       <h1 className="intro-title">The Better Teton County, Wyoming GIS Hub</h1>
       <h2>Contact Us for Teton County GIS Support</h2>
+      <div className="floating-update-banner">
+        <p><strong>3D maps added!</strong><br />Select them as a base-map. Contact us if you have issues!</p>
+      </div>
+
 
       
       <div className="svg-container">
@@ -181,8 +222,6 @@ document.addEventListener('DOMContentLoaded', () => {
           </svg>
         )}
       </div>
-      
-      <div className="chevron-button-container">
       <a
         className="button explore-button"
         onClick={() => {
@@ -192,99 +231,132 @@ document.addEventListener('DOMContentLoaded', () => {
         }}
         role="button"
       >
-          <span>Explore</span>
-          <div className="icon">
-            <i className="icon-caret">🗺️</i>
-            
-          </div>
-        </a>
-
-        <div className="row narrow-row">
-          <a className="button updates-button" onClick={() => navigate('/updates')} role="button">
-            <span>Updates</span>
-            <div className="icon">
-              <i className="icon-caret">📨</i>
-              
-            </div>
-          </a>
-          <a className="button contact-button" onClick={handleOpenContact} role="button">
-            <span>Contact</span>
-            <div className="icon">
-              <i className="icon-caret">📞</i>
-              
-            </div>
-          </a>
+        <span>Explore</span>
+        <div className="icon">
+          <i className="icon-caret">🗺️</i>
         </div>
+      </a>
 
-        <div className="row wide-row">
-          <a className="button tutorial-button" onClick={() => navigate('/tutorial')} role="button">
-            <span>Tutorial</span>
-            <div className="icon">
-              <i className="icon-caret">🤔</i>
-             
-            </div>
-          </a>
-          <a className="button share-button" onClick={handleOpenShare} role="button">
-            <span>Share</span>
-            <div className="icon">
-              <i className="icon-caret">🗣️</i>
-            </div>
-          </a>
-        </div>
-      </div>
-
-      
-      
-      {isBookmarkGuideOpen && (
-        <div className="bookmark-guide-overlay">
-          <div className="bookmark-guide-container">
-            <button className="close-button" onClick={handleCloseBookmarkGuide}>
-              X
-            </button>
-            <h2>How to Bookmark this Page</h2>
-            <div className="bookmark-instructions">
-            <p><strong>How to bookmark webpages in Chrome</strong></p>
-            <p><u>On Laptop</u></p>
-            <p>Step 1. Open the Chrome browser on your Windows or MAC laptop.</p>
-            <p>Step 2. Visit your favorite website you wish to bookmark.</p>
-            <p>Step 3. Beside the address bar on top, click the “Bookmark this tab” (star icon) option.</p>
-            <p>Step 4. Now enter a name for the bookmark and choose a folder to save it.</p>
-            <p>Step 5. Click “Done“.</p>
-            <p>That’s it. Your bookmark will now be added to the Chrome browser on your laptop.</p>
-            
-            <p><strong>How to bookmark your webpage in Edge</strong></p>
-            <p><u>On Computer/Laptop</u></p>
-            <p>Step 1. Launch the Microsoft Edge browser on your computer.</p>
-            <p>Step 2. Go to the webpage you want to create the bookmark for.</p>
-            <p>Step 3. Once the website is loaded, click on the “Add this page to favorites” option (star icon) or press “Ctrl + D” on your keyboard.</p>
-            <p>Step 4. Now, enter a bookmark name and choose a folder to save it. Once finished, click the “Done” button.</p>
-            <p>This will add the webpage to the favorites tab, also known as the bookmark section, in your Microsoft Edge browser.</p>
-
-            <p><strong>How to bookmark a website in Safari</strong></p>
-            <p><u>On Computer/Laptop</u></p>
-            <p>Step 1. Open the Safari browser on your laptop or computer.</p>
-            <p>Step 2. Go to the webpage you want to bookmark.</p>
-            <p>Step 3. Select the “Share” button in the gray toolbar.</p>
-            <p>Step 4. Select the “Add Bookmark” option.</p>
-            <p>Step 5. Choose where to add the bookmark and rename it if you’d like.</p>
-            <p>Step 6. Click “Add” to save the bookmark.</p>
-            <p><strong>How to create a bookmark in Firefox</strong></p>
-            <p><u>On Desktop/Laptop</u></p>
-            <p>Step 1. Open the Firefox on your desktop or laptop.</p>
-            <p>Step 2. Go to the webpage you want to bookmark.</p>
-            <p>Step 3. Click the “Star icon” on the address bar.</p>
-            <p>Step 4. From the menu that drops down, enter a name for your bookmark, then click “Done“.</p>
-
-              {/* Add more instructions for other browsers as needed */}
-            </div>
-          </div>
-        </div>
-      )}
-      
       {isTutorialOpen && <Tutorial onClose={handleCloseTutorial} />}
       {isContactOpen && <ContactForm onClose={handleCloseContact} />}
       {isShareOpen && <SharePopup onClose={handleCloseShare} />}  {/* Add the share popup */}
+      
+      <div className="first-feature-container">
+        <div className="first-feature-photo">
+          <img src="/top_image.png" alt="Teton County" class="first-feature-image" />
+        </div>
+
+        <div className="first-feature-text">
+          Teton County's <br />Needed <br />Ownership Viewer
+          
+        </div>
+        
+      </div>
+
+      <div className="second-feature-container">
+        <div className="feature-text-section">
+          <div className="feature-left-text">
+            <span className="red-line">Fast.</span><br />
+            <span className="blue-line">Searchable.</span><br />
+            <span className="green-line">Built with locals in mind.</span>
+          </div>
+
+          <div className="feature-right-description">
+            Our platform blends modern tools with the familiarity of older systems, making it fast for quick lookups and powerful enough for in-depth research. 
+          </div>
+        </div>
+
+        <div className="feature-cards">
+          <div className="feature-card red-card" onClick={() => handleCardClick('red')}>
+            <h3>⚡ Fast & Easy</h3>
+            <img src="/fast.png" alt="Fast & Easy" className="card-image" />
+
+            <p>Designed for simplicity. Navigate and explore in seconds.</p>
+          </div>
+          <div className="feature-card blue-card" onClick={() => handleCardClick('blue')}>
+            <h3>🔍 Smart Search</h3>
+            <img src="/search.png" alt="Smart Search" className="card-image" />
+            <p>Powerful filters make finding exactly what you need effortless.</p>
+          </div>
+          <div className="feature-card green-card" onClick={() => handleCardClick('green')}>
+            <h3>🌄 Built Local</h3>
+            <img src="/local.png" alt="Built Local" className="card-image" />
+            <p>Made for our community. Always evolving based on feedback.</p>
+          </div>
+        </div>
+
+
+        {activeCard && (
+          <div
+          className="feature-modal"
+          style={{ top: window.scrollY + 'px' }}
+        >
+        
+            <div className={`modal-content modal-${activeCard}`}>
+              <button className="modal-close" onClick={closeModal}>×</button>
+              {activeCard === 'red' && (
+                <>
+                  <h2> Fast. Easy. Intuitive.</h2>
+                  <p>
+                    The Better Teton County GIS platform is built for efficiency and usability. It blends design elements from older, well-loved versions of the GIS system with modern tools to create an intuitive, fast, and effective experience.
+                    <br /><br />
+                    Whether you're tackling quick daily tasks or answering large, complex mapping questions, the platform is designed to save time and reduce frustration. With powerful search, modern visual layers, and a built-in report builder, users can generate detailed reports—including mailing addresses, property values, and tax data—for thousands of parcels in seconds.
+                  </p>
+                </>
+              )}
+              {activeCard === 'blue' && (
+                <>
+                  <h2> Smart Search. Filter What Matters.</h2>
+                  <p>
+                    The search is built for usability. Unlike the current system, you don’t need to type an exact match. Our smarter search returns relevant results even from partial or imperfect queries. 
+                    <br /><br />
+                    Results are parcel-based, allowing you to navigate directly from search to the map to higlight one or many parcels at once. From the serch results, it's just one click to access tax info, property details, and clerk records. 
+                  </p>
+
+                </>
+              )}
+              {activeCard === 'green' && (
+                <>
+                  <h2> Locally Built. Community Focused.</h2>
+                  <p>
+                    Built by locals who know the frustrations of the current system, the Better Teton County GIS was created from firsthand experience. It’s designed to solve the everyday challenges faced by realtors, planners, and residents throughout the valley.
+                    <br /><br />
+                    With constant updates and a focused team, feedback from users directly shapes the platform. The result is a tool that evolves with the needs of Teton County — practical, fast, and purpose-built for the people who rely on it.
+                  </p>
+                </>
+              )}
+            </div>
+          </div>
+        )}
+
+      </div>
+
+
+    
+      
+      <div className="features-section feature-dark single-feature-image">
+        <h1 className="feature-heading">🗺️ Build Custom Maps</h1>
+        <p className="feature-subtext">
+          Use any basemap with notes, legends, shapes and more to build any map
+          in a fully customizable environment.
+        </p>
+        <img src="/map_maker.png" alt="Map Maker Preview" className="map-preview-image" />
+      </div>
+
+      <footer className="intro-footer">
+        <p className="footer-message">Reach out if you have questions.</p>
+        <div className="footer-links">
+          <button className="footer-button" onClick={() => navigate('/updates')}>Updates</button>
+          <a className="footer-button" href="mailto:noahgans@tetoncountygis.com" target="_blank" rel="noopener noreferrer">Contact</a>
+          <button className="footer-button" onClick={handleOpenShare}>Share</button>
+        </div>
+      </footer>
+
+
+
     </div>
+    
+    
   );
 };
 

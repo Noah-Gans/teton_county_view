@@ -39,13 +39,25 @@ const MainHeader = () => {
       >
         Search
       </Link>
+      {window.innerWidth > 768 &&(
       <Link
-        className={`header-tab ${activeTab === "print" ? "active" : ""}`}
-        onClick={() => handleTabChange("print")}
-        to="/print"
-      >
-        Reports
-      </Link>
+          className={`header-tab ${activeTab === "report" ? "active" : ""}`}
+          onClick={() => handleTabChange("report")}
+          to="/report"
+        >
+          Reports
+        </Link>
+      )}
+      {window.innerWidth > 768 && (
+        <Link
+          className={`header-tab ${activeTab === "print" ? "active" : ""}`}
+          onClick={() => handleTabChange("print")}
+          to="/print"
+        >
+          Print
+        </Link>
+      )}
+
       <Link
         className={`header-tab ${activeTab === "home" ? "active" : ""}`}
         onClick={() => handleTabChange("home")}

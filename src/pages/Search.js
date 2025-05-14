@@ -31,7 +31,7 @@ const Search = () => {
   const navigate = useNavigate();
   const [selectedFeatureIds, setSelectedFeatureIds] = useState([]); // Track selected features
   const { rawOwnershipData, transformedOwnershipData, loading, setMapFocusFeature } = useContext(DataContext);  // Use pre-transformed data
-  const { focusFeatures, setFocusFeatures, searchResults, setSearchResults, setSelectedFeatures, setIsMapTriggeredFromSearch, setActiveTab} = useMapContext(); // Access selectedFeatures from MapProvider
+  const { focusFeatures, setFocusFeatures, searchResults, setSearchResults, setSelectedFeatures, isMapTriggeredFromSearch, setIsMapTriggeredFromSearch, setActiveTab} = useMapContext(); // Access selectedFeatures from MapProvider
   
   const printFeatures = () => {
     console.log('Top 5 Features in stripped GeoJSON:');
@@ -52,25 +52,64 @@ const Search = () => {
     }
   }, [rawOwnershipData]); // Trigger when `rawOwnershipData` updates
 
-
-  // Function to search the raw ownership data
-const searchRawOwnershipData = (query, data) => {
-  const lowerCaseQuery = query.toLowerCase().trim();
-
-  return data.filter(feature => {
-    const properties = feature.properties || {};
-
-    const owner = properties.owner?.toLowerCase().trim() || '';
-    const pidn = properties.pidn?.toLowerCase().trim() || '';
-    const tax_id = properties.tax_id?.toLowerCase().trim() || '';
-
-    return (
-      owner.includes(lowerCaseQuery) ||
-      pidn.includes(lowerCaseQuery) ||
-      tax_id.includes(lowerCaseQuery)
-    );
-  });
+  const normalizeText = (text) => {
+    return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, '') // Remove dashes, punctuation, and special characters
+        .replace(/\s+/g, ' ') // Replace multiple spaces with a single space
+        .trim();
 };
+
+const searchRawOwnershipData = (query, data) => {
+    const lowerCaseQuery = normalizeText(query); // Normalize user query
+    const queryTokens = lowerCaseQuery.split(/\s+/); // Split query into individual words
+    const phraseRegex = new RegExp(`\\b${lowerCaseQuery}\\b`, "i"); // Exact phrase match
+  
+    return data
+        .map((feature) => {
+            const properties = feature.properties || {};
+            const fieldsToSearch = [
+                properties.owner || '',
+                properties.pidn || '',
+                properties.tax_id || '',
+                properties.st_address || '', // ✅ Only physical address
+            ].map(normalizeText); // Normalize all fields
+
+            let score = 0;
+
+            // ✅ Strong match: Exact phrase in any field
+            if (fieldsToSearch.some((field) => phraseRegex.test(field))) {
+                score += 500;
+            }
+
+            // ✅ Moderate match: All words appear as whole words
+            if (queryTokens.every((token) => fieldsToSearch.some((field) => new RegExp(`\\b${token}\\b`, "i").test(field)))) {
+                score += 250;
+            }
+
+            // ✅ Weak match: At least one word is an exact match
+            if (queryTokens.some((token) => fieldsToSearch.some((field) => new RegExp(`\\b${token}\\b`, "i").test(field)))) {
+                score += 100;
+            }
+
+            // ✅ Partial match (Low importance)
+            if (queryTokens.some((token) => fieldsToSearch.some((field) => field.includes(token)))) {
+                score += 10; // Lower impact to reduce irrelevant matches
+            }
+
+            // ✅ Boost owner and address relevance
+            if (fieldsToSearch[0] !== '') score += 100; // Owner field (important)
+            if (fieldsToSearch[3] !== '') score += 50; // Physical address field (important)
+
+            return { feature, score };
+        })
+        .filter(({ score }) => score >= 300) // ✅ Filter out weak matches
+        .sort((a, b) => b.score - a.score) // ✅ Rank by relevance
+        .slice(0, 200) // ✅ Cap results to top 200 most relevant
+        .map(({ feature }) => feature);
+};
+
+  
 
   // Function to search the transformed data
   const searchTransformedData = (query, transformedData) => {
@@ -146,11 +185,23 @@ const searchRawOwnershipData = (query, data) => {
   // Handle "Map It" button click
   const handleMapClick = (result) => {
     const features = Array.isArray(result) ? result.flat() : [result];
-    setFocusFeatures(features); // Set the features for focus
-    setIsMapTriggeredFromSearch(true);
-    setActiveTab('map'); // Change tab through MapProvider
-    navigate('/map');
-  };
+
+    console.log("Before setting focusFeatures:", focusFeatures);
+    setFocusFeatures(features);
+
+    setIsMapTriggeredFromSearch((prev) => {
+        console.log("Previous map trigger state:", prev);
+        return !prev; // Toggle value to force update
+    });
+
+    setTimeout(() => {
+        console.log("Navigating to map...");
+        setActiveTab('map');
+        navigate('/map');
+    }, 200);
+};
+
+
   
   // Add event listener for the "Enter" key to trigger the search
   useEffect(() => {
@@ -184,6 +235,7 @@ const searchRawOwnershipData = (query, data) => {
                 <div className="search-bar">
                   <input
                     type="text"
+                    autoFocus
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search by owner, address, PIDN..."
@@ -242,31 +294,36 @@ const searchRawOwnershipData = (query, data) => {
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => toggleFeatureSelection(result)} // Pass `result` instead of `feature`
+                            onChange={() => toggleFeatureSelection(result)}
                           />
                         </div>
-                        <div className="result-details">
-                          <strong>Owner:</strong> {properties.owner || 'N/A'}<br />
-                          <strong>PIDN:</strong> {properties.pidn || 'N/A'}<br />
-                          <strong>Tax ID:</strong> {properties.tax_id || 'N/A'}<br />
-                          <strong>Mail Addr:</strong> {properties.address
-                            ? `${properties.address}${properties.owner_city ? ', ' + properties.owner_city : ''}${properties.owner_state ? ', ' + properties.owner_state : ''}`
-                            : 'N/A'}
-                          <br />
-                          <strong>Deed:</strong> {properties.deed || 'N/A'}<br />
-                        </div>
-                        <div className="result-buttons">
-                          <div className="result-buttons-grid">
-                            <button className="map-it-button" onClick={() => handleMapClick(result)}>Map</button>
-                            <button className="detail-button" onClick={() => window.open(`https://gis.tetoncountywy.gov/portal/apps/dashboards/ca93f7b7ae3e4d51ad371121a64ee739#accountno=${properties.accountno}`, '_blank')}>
-                              Detail
-                            </button>
-                            <button className="tax-button" onClick={() => window.open(taxLink, '_blank')}>
-                              Tax
-                            </button>
-                            <button className="clerk-button" onClick={() => window.open(clerkLink, '_blank')}>
-                              Clerk
-                            </button>
+
+                        {/* NEW PARENT WRAPPER */}
+                        <div className="result-body">
+                          <div className="result-details">
+                            <strong>Owner:</strong> {properties.owner || 'N/A'}<br />
+                            <strong>PIDN:</strong> {properties.pidn || 'N/A'}<br />
+                            <strong>Tax ID:</strong> {properties.tax_id || 'N/A'}<br />
+                            <strong>Mail Addr:</strong> {properties.address
+                              ? `${properties.address}${properties.owner_city ? ', ' + properties.owner_city : ''}${properties.owner_state ? ', ' + properties.owner_state : ''}`
+                              : 'N/A'}
+                            <br />
+                            <strong>Physical Addr</strong> {properties.st_address || 'N/A'}<br />
+                          </div>
+
+                          <div className="result-buttons">
+                            <div className="result-buttons-grid">
+                              <button className="map-it-button" onClick={() => handleMapClick(result)}>Map</button>
+                              <button className="detail-button" onClick={() => window.open(`https://gis.tetoncountywy.gov/portal/apps/dashboards/ca93f7b7ae3e4d51ad371121a64ee739#accountno=${properties.accountno}`, '_blank')}>
+                                Detail
+                              </button>
+                              <button className="tax-button" onClick={() => window.open(taxLink, '_blank')}>
+                                Tax
+                              </button>
+                              <button className="clerk-button" onClick={() => window.open(clerkLink, '_blank')}>
+                                Clerk
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>

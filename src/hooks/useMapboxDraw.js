@@ -55,11 +55,19 @@ export default function useMapboxDraw({ onPolygonCreated, onLineCreated, onPolyg
     setStoredFeatures(features);
     updateLabels(features);
   };
+/**
+ * Formats numbers with commas for readability.
+ * Example: 1234567 -> "1,234,567"
+ */
+const formatNumber = (num) => {
+  return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+};
 
   /**
    * ✅ Show Live Area/Length While Drawing
    */
   /**
+   * 
  * ✅ Show Live Area/Length While Drawing (with safety checks)
  */
 const handleDrawRender = () => {
@@ -75,20 +83,48 @@ const handleDrawRender = () => {
                 console.warn("⚠️ Polygon has insufficient points, skipping measurement.");
                 return feature;
             }
-            measurement = turf.area(feature); // 🟢 Get live area
-            center = turf.centerOfMass(feature); // 🟢 Get center of mass
-            feature.properties.measurement = `${(measurement / 1000000).toFixed(2)} km²`; // Convert to km²
-        } else if (feature.geometry.type === "LineString") {
+            measurement = turf.area(feature); // Get area in m²
+            center = turf.centerOfMass(feature); // Get center for label
+        
+            // Convert to acres, square feet, and square miles
+            const acres = measurement * 0.000247105; // 1 m² = 0.000247105 acres
+            const squareFeet = measurement * 10.7639; // 1 m² = 10.7639 ft²
+            const squareMiles = acres * 0.0015625; // 1 acre = 0.0015625 square miles
+        
+            let displayMeasurement = "";
+        
+            if (acres < 1) {
+                // Show square feet and acres if less than 1 acre
+                displayMeasurement = `${formatNumber(squareFeet.toFixed(0))} ft² / ${acres.toFixed(2)} acres`;
+            } else if (acres >= 1 && acres < 640) {
+                // Show only acres if less than 1 square mile (640 acres)
+                displayMeasurement = `${acres.toFixed(2)} acres`;
+            } else {
+                // Show acres and square miles if greater than or equal to 1 square mile
+                displayMeasurement = `${acres.toFixed(2)} acres / ${squareMiles.toFixed(2)} mi²`;
+            }
+        
+            feature.properties.measurement = displayMeasurement;
+          } else if (feature.geometry.type === "LineString") {
             if (feature.geometry.coordinates.length < 2) {
                 console.warn("⚠️ LineString has insufficient points, skipping measurement.");
                 return feature;
             }
-            measurement = turf.length(feature, { units: "kilometers" }); // 🟢 Get live length
+        
+            measurement = turf.length(feature, { units: "miles" }); // 🟢 Get length in miles
+            const feet = measurement * 5280; // 1 mile = 5280 feet
+        
             center = turf.midpoint(
                 turf.point(feature.geometry.coordinates[0]),
                 turf.point(feature.geometry.coordinates[feature.geometry.coordinates.length - 1])
             );
-            feature.properties.measurement = `${measurement.toFixed(2)} km`;
+        
+            // Formatting the output
+            let displayMeasurement = measurement < 1 
+                ? `${formatNumber(feet.toFixed(0))} ft`  // Show feet if under a mile
+                : `${measurement.toFixed(2)} mi`;       // Show miles if 1 mile or more
+        
+            feature.properties.measurement = displayMeasurement;
         }
 
         feature.properties.labelPoint = center?.geometry?.coordinates || null;
@@ -325,6 +361,7 @@ useEffect(() => {
   function clearAllDrawings() {
     if (!drawRef.current) return;
     drawRef.current.deleteAll();
+    setStoredFeatures(null); // ✅ Prevent re-restore
     isDrawingRef.current = false;
   }
 

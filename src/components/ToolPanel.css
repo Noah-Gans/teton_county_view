@@ -113,5 +113,31 @@
     visibility: visible;
     opacity: 1;
   }
+
+
+  @media (max-width: 768px) {
+  .tool-panel {
+    top: 5px;  /* Align at the very top */
+  
+  }
+
+  .tool-btn {
+    width: 35px; /* Slightly larger for touch */
+    height: 35px;
+    font-size: 14px;
+    margin: 0 5px;
+  }
+
+  .tool-search {
+    width: 150px; /* Reduce search bar width on mobile */
+  }
+  
+  .select-parcels-btn {
+    display: none !important; /* Hide on mobile */
+  }
+
+  
+}
+
   
   

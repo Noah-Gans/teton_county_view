@@ -252,7 +252,6 @@ export const loadCustomIcons = (map) => {
   
     // Create a mapping of "Name" (e.g., "kml_249") to colors
     const featureColorMapping = {};
-    console.log(features)
     features.forEach((feature) => {
       if (feature.properties) {
         let colorKey;
@@ -296,13 +295,9 @@ export const loadCustomIcons = (map) => {
               : 'Name';
     const colorExpression = ['match', ['get', matchKey]];
     const opacityExpression = ['match', ['get', layerName === 'public_land' ? 'OBJECTID' : 'Name']];
-    console.log("came here")
-    console.log(featureColorMapping)
     Object.keys(featureColorMapping).forEach((key) => {
-      console.log(key)
       // Convert key to number for Mapbox match expression
       const numericKey = layerName === 'public_land' ? parseInt(key, 10) : key;
-      console.log(numericKey)
       colorExpression.push(numericKey);
       colorExpression.push(featureColorMapping[key]);
   
@@ -586,6 +581,7 @@ export const loadCustomIcons = (map) => {
             };
         }
          else {
+            console.log("came here")
             const adjustedSource = 
             layerName === "ownership_borders" || 
             layerName === "ownership_outer_borders" || 
@@ -598,17 +594,27 @@ export const loadCustomIcons = (map) => {
                 ...style,
                 source: adjustedSource, // Set the source to match the layer name
             };
+            console.log(layerName)
             // 🔹 Adjust ownership border color based on basemap
-            if (layerName === "ownership" || layerName === "ownership_outer_borders" ) {
-              console.log("Adjusting ownership border color for basemap:", baseMap);
-              style.paint = {
-                ...style.paint,
-                "line-color": baseMap.current === "satellite-v9" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)", // White on satellite, black otherwise
-                
-              };
+            if(adjustedSource == "ownership"){
+              // Handle fill layer (ownership)
+              if (layerName === "ownership") {
+                style.paint = {
+                  ...style.paint,
+                  "fill-outline-color": baseMap.current === "satellite-streets-v12" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)", // White on satellite, black otherwise
+                };
+              } 
+              // Handle border layers (ownership_outer_borders & ownership_inner_borders)
+              else {
+                style.paint = {
+                  ...style.paint,
+                  "line-color": baseMap.current === "satellite-streets-v12" ? "rgb(255, 255, 255)" : "rgb(0, 0, 0)", // White on satellite, black otherwise
+                };
+              }
             }
+            console.log("Will return this style: ", style);
         }
-        return style;
+      return style;
     }
     if (layerName.toLowerCase().includes('plss')) {
         // Special styling for layers that have "plss" in their name

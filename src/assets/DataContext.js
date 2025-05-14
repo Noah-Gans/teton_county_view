@@ -44,7 +44,7 @@ export const DataProvider = ({ children }) => {
 
   const fetchOwnershipLayer = async () => {
     try {
-      const ownershipUrl = 'https://storage.googleapis.com/first_bucket_store/test/stripeed_file';
+      const ownershipUrl = 'https://storage.googleapis.com/first_bucket_store/search_file/ownership_search_file';
       const response = await fetch(ownershipUrl);
   
       if (!response.ok) {

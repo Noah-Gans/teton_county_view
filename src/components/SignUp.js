@@ -103,19 +103,41 @@ const Signup = () => {
   return (
     <div className="signup-page">
       <div className="signup-left">
-        <h1>A Better Teton County GIS Subscription</h1>
-        
-        <p className = "subheader-signup"> If you use the county GIS platform every week, this subscription is worth its cost in time saved. </p>
-        {/* Features Section */}
-        <ul>
-          <li>📍 Detailed layers</li>
-          <li>⏱️ Updated Daily</li>
-          <li>📊 Built In Report Builder</li>
-          <li>⚡ Always Improving</li>
-        </ul>
-        <p className="price">$00.00 / month</p>
-        <p><small>Cancel anytime, no hidden fees.</small></p>
+        <div className="signup-left-content">
+          <h1>A Better Teton County GIS Subscription</h1>
+          <p className="subheader-signup">
+            If you use the county GIS platform every week, this subscription is worth its cost in time saved.
+          </p>
+          <ul>
+            <li>🖨️ Built-In Map Maker for Printing</li>
+            <li>🔍 Improved Multi-Search & Parcel Selection</li>
+            <li>📊 Built-In Report Builder</li>
+            <li>🌐 3D Basemaps</li>
+            <li>📍 Detailed, High-Quality Layers</li>
+            <li>⏱️ Updated Daily</li>
+            <li>⚡ Constantly Updated</li>
+          </ul>
+          <p className="price">$27.99 / month</p>
+          <p>
+            <small>
+              Cancel anytime, no hidden fees. <br />
+              <span className="discount-highlight">Discounted pricing available for organizations & firms.</span>
+            </small>
+          </p>
+          <button
+              className="company-pricing-btn"
+              onClick={() =>
+                window.location.href =
+                  "mailto:noahgans@tetoncountygis.com?subject=Company Pricing Inquiry - Your company here &body=Hi, I'm interested in discounted corporate pricing for the GIS platform."
+              }
+            >
+              Contact for Company Pricing
+          </button>
+
+        </div>
       </div>
+
+
 
       <div className="signup-right">
         <button className="close-button" onClick={() => navigate('/')}>✖</button>

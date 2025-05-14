@@ -33,7 +33,7 @@ const ToolPanel = ({
                 <span className="tooltip-text">Draw a Polygon</span>
               </div>
 
-              <div className="tooltip-container">
+              <div className="tooltip-container select-parcels-btn">
                 <button className="tool-btn" onClick={onSelectParcels}>📌</button>
                 <span className="tooltip-text">Select Parcels with Polygon</span>
               </div>

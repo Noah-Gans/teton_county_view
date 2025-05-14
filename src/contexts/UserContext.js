@@ -10,6 +10,7 @@ export const useUser = () => useContext(UserContext);
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
+  const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -21,12 +22,14 @@ export function UserProvider({ children }) {
         if (userDoc.exists()) {
           const data = userDoc.data();
           setSubscriptionStatus(data.subscriptionStatus || 'none');
+          setRole(data.role || 'none'); // ✅ Add this line
         } else {
           setSubscriptionStatus('none');
         }
       } else {
         setUser(null);
         setSubscriptionStatus(null);
+        setRole(null); // ✅ Reset on logout
       }
       setLoading(false);
     });
@@ -46,7 +49,7 @@ export function UserProvider({ children }) {
 
   // Provide user, subscriptionStatus, and loading to the rest of the app
   return (
-    <UserContext.Provider value={{ user, subscriptionStatus, loading, logout }}>
+    <UserContext.Provider value={{ user, subscriptionStatus,role, loading, logout }}>
       {children}
     </UserContext.Provider>
   );

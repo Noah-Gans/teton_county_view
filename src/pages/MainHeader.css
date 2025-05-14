@@ -5,6 +5,7 @@
   position: absolute; /* Position the header above the map */
   z-index: 11;
   height: 40px;
+  gap: 0px;
 }
 
 
@@ -81,3 +82,18 @@
   display: none;
 }
 
+
+@media (max-width: 768px) {
+  .main-header {
+    position: absolute; /* Keep it over the map */
+    top: calc(100dvh - 50px); /* Move header to the bottom */
+    right: 25%;
+    width: 75%;
+    height: 50px; /* Keep similar height */
+  }
+
+  .header-tab {
+    margin-left: 10px;
+    margin-right: 10px;
+  }
+}

@@ -1,8 +1,8 @@
 /* src/Map.css */
 .map-container {
   position: relative;
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vw;
   overflow: hidden;
 }
 .mapboxgl-ctrl-top-left {
@@ -13,18 +13,18 @@
   position: absolute;
   top: 10px;
   left: 10px;
-  z-index: 9;
+  z-index: 7;
   background: white;
   padding: 5px;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  border-radius: 90px;
+  box-shadow: 0 1px 3px rgba(255, 0, 0, 0.3);
 }
 
 #map {
   position: absolute;
   top: 0px; /* Adjusted for MainHeader + ToolPanel height */
   left: 0;
-  height: calc(100vh - 50px); /* Adjust height for headers */
+  height: calc(100vh); /* Adjust height for headers */
   width: 100%;
   z-index: 1;
 }
@@ -67,7 +67,7 @@
   position: absolute;
   bottom: 20px;
   left: 20px; /* Ensure it's well inside the map container */
-  z-index: 10; /* Keep it above all other elements */
+  z-index: 9; /* Keep it above all other elements */
   pointer-events: auto;
 }
 
@@ -84,6 +84,9 @@
   justify-content: center;
   padding: 0;
   position: relative;
+  z-index: 10; /* Keep it above all other elements */
+
+
 }
 
 .layer-icon {
@@ -102,6 +105,8 @@
   padding: 10px;
   width: 150px;
   pointer-events: auto;
+  z-index: 10; /* Keep it above all other elements */
+
 }
 
 .layer-selector-popup button {
@@ -125,12 +130,6 @@
   display: block;
 }
 
-.map-container {
-  position: relative;
-  height: 100vh;
-  width: 100%;
-  overflow: hidden;
-}
 
 #map {
   position: absolute;
@@ -184,3 +183,58 @@
   background-color: #005236;
 }
 
+.print-center-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: start;
+  height: 120vh;
+  width: 100%;
+  overflow: auto;
+  position: relative;
+  top: -55px;
+
+}
+
+
+.print-scroll-wrapper {
+  display: flex;
+  position: relative;
+  width: 100%;         /* 👈 Only as wide as content */
+  height: calc(100vh);
+  overflow: auto;
+  margin-bottom: 100px;
+}
+.print-map-wrapper{
+  z-index: 1;
+  color: #00523700;
+  
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    position: relative;
+    height: 100dvh;
+    width: 100%;
+    overflow: hidden;
+  }
+  .layer-selector-container {
+    position: absolute;
+    bottom: 50px;
+    right: 10px; /* Move it to the right */
+    left: auto; /* Override left positioning */
+    z-index: 10; /* Keep it above all other elements */
+  }
+
+  .layer-selector-popup {
+    position: absolute;
+    bottom: 60px; /* Move it 60px above the button */
+    right: 0; /* Align it with the right side of the button */
+    left: auto; /* Override any left positioning */
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    padding: 10px;
+    width: 150px;
+    pointer-events: auto;
+  }
+}
