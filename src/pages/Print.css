@@ -175,6 +175,10 @@
   position: relative;
   display: inline-block;
 }
+.tooltip-wrapper button svg {
+  width: 24px;
+  height: 24px;
+}
 
 .tooltip-text {
   visibility: hidden;

@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Rnd } from 'react-rnd';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
-export default function PinElement({ element, onChange, onDelete }) {
+export default function CircleElement({ element, onChange, onDelete }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();
   const isSelected = selectedPrintElement?.id === element.id;
 

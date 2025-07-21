@@ -180,6 +180,45 @@ export const MapProvider = ({ children }) => {
       setSelectedPrintElement(newLegend);
     };
 
+    const addPin = () => {
+      const newPin = {
+        id: Date.now(),
+        type: 'pin',
+        x: 120,
+        y: 120,
+        width: 40,
+        height: 60,
+        fill: '#ff0000',
+        stroke: '#000000',
+        strokeWidth: 2,
+        fillOpacity: 1,
+        strokeOpacity: 1,
+        rotation: 0
+      };
+      setPrintElements((prev) => [...prev, newPin]);
+      setSelectedPrintElement(newPin);
+    };
+    const addShape = (svgKey) => {
+      const newShape = {
+        id: Date.now(),
+        type: 'shape',
+        svgKey,
+        x: 100,
+        y: 100,
+        width: 60,
+        height: 60,
+        fill: '#ffffff',
+        stroke: '#000000',
+        strokeWidth: 1,
+        fillOpacity: 1,
+        strokeOpacity: 1,
+        rotation: 0
+      };
+      setPrintElements(prev => [...prev, newShape]);
+      setSelectedPrintElement(newShape);
+    };
+    
+    
     const addArrowShape = () => {
       const newArrow = {
         id: Date.now(),
@@ -205,16 +244,7 @@ export const MapProvider = ({ children }) => {
       setSelectedPrintElement(newCompass);
     };
 
-    const addPin = () => {
-      const newPin = {
-        id: Date.now(),
-        type: 'pin',
-        x: 120,
-        y: 120,
-      };
-      setPrintElements((prev) => [...prev, newPin]);
-      setSelectedPrintElement(newPin);
-    };
+
 
     const addRectangle = () => {
       const newRect = {
@@ -328,7 +358,8 @@ export const MapProvider = ({ children }) => {
     deletePrintElement,
     clearPrintElements,
     selectedPrintElement,
-    setSelectedPrintElement
+    setSelectedPrintElement,
+    addShape
     
   };
 

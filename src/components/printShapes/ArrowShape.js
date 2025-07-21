@@ -1,6 +1,6 @@
 import { Rnd } from 'react-rnd';
 import React, { useState } from 'react';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
 export default function ArrowShape({ shape, onChange, onDelete, isPrinting }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();

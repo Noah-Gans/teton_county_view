@@ -1,28 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Rnd } from 'react-rnd';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
-export default function DiamondElement({ shape, onChange, onDelete }) {
+export default function TriangleElement({ shape, onChange, onDelete }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();
-  const [isSelected, setIsSelected] = useState(false);
+  const isSelected = selectedPrintElement?.id === shape.id;
+
   const [livePosition, setLivePosition] = useState({ x: shape.x, y: shape.y });
   const [liveSize, setLiveSize] = useState({ width: shape.width, height: shape.height });
   const [rotation, setRotation] = useState(shape.rotation || 0);
 
-  const fill = shape.fill || '#000000';
-  const stroke = shape.stroke || '#000000';
-  const strokeWidth = shape.strokeWidth ?? 2;
-  const fillOpacity = shape.fillOpacity ?? 1;
-  const strokeOpacity = shape.strokeOpacity ?? 1;
-
-
-  useEffect(() => {
-    console.log("came here")
-    setIsSelected(selectedPrintElement?.id === shape.id);
-  }, [selectedPrintElement, shape.id]);
-
-  const handleRotation = (eMove) => {
-    const shapeElement = document.getElementById(`diamond-${shape.id}`);
+  // Correct rotation handler using bounding rect
+  const handleMouseMove = (eMove) => {
+    const shapeElement = document.getElementById(`triangle-${shape.id}`);
     if (!shapeElement) return;
 
     const rect = shapeElement.getBoundingClientRect();
@@ -31,24 +21,25 @@ export default function DiamondElement({ shape, onChange, onDelete }) {
 
     const dx = eMove.pageX - centerX;
     const dy = eMove.pageY - centerY;
-    const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
-    const newRot = Math.round(angle);
 
-    setRotation(newRot);
-    onChange({ ...shape, rotation: newRot });
+    const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
+    const updatedRotation = Math.round(angle);
+
+    setRotation(updatedRotation);
+    onChange({ ...shape, rotation: updatedRotation });
   };
 
   return (
     <>
-      {/* Green dashed edit box */}
+      {/* Green bounding box */}
       {isSelected && (
         <div
           style={{
             position: 'absolute',
-            top: livePosition.y - 2,
-            left: livePosition.x - 2,
-            width: liveSize.width + 10,
-            height: liveSize.height + 4,
+            top: livePosition.y - 1,
+            left: livePosition.x - 1,
+            width: liveSize.width + 2,
+            height: liveSize.height + 2,
             border: '2px dashed #1d784f',
             borderRadius: '4px',
             zIndex: 999,
@@ -61,14 +52,9 @@ export default function DiamondElement({ shape, onChange, onDelete }) {
 
       <Rnd
         bounds="parent"
-        
         size={liveSize}
         position={livePosition}
         onClick={() => setSelectedPrintElement(shape)}
-        onClick={(e) => {
-          e.stopPropagation(); // Prevents deselection
-          setSelectedPrintElement(shape);
-        }}
         onDrag={(e, d) => setLivePosition({ x: d.x, y: d.y })}
         onDragStop={(e, d) => {
           const updated = { ...shape, x: d.x, y: d.y };
@@ -103,7 +89,7 @@ export default function DiamondElement({ shape, onChange, onDelete }) {
         }}
       >
         <div
-          id={`diamond-${shape.id}`}
+          id={`triangle-${shape.id}`}
           style={{
             width: '100%',
             height: '100%',
@@ -112,46 +98,48 @@ export default function DiamondElement({ shape, onChange, onDelete }) {
             transformOrigin: 'center center',
           }}
         >
-          {/* ✅ Rotation anchor inside rotated context */}
+          {/* Rotation Handle inside the rotated element */}
           {isSelected && (
             <div
               onMouseDown={(e) => {
                 e.stopPropagation();
-                window.addEventListener('mousemove', handleRotation);
+                window.addEventListener('mousemove', handleMouseMove);
                 window.addEventListener(
                   'mouseup',
                   () => {
-                    window.removeEventListener('mousemove', handleRotation);
+                    window.removeEventListener('mousemove', handleMouseMove);
                   },
                   { once: true }
                 );
               }}
               style={{
                 position: 'absolute',
-                top: -30,
                 left: '50%',
-                transform: 'translateX(-50%)',
+                top: 10,
+                transform: `translate(-50%, -40px) rotate(${-rotation}deg)`,
                 width: 20,
                 height: 20,
                 backgroundColor: '#1d784f',
                 borderRadius: '50%',
                 border: '2px solid white',
                 cursor: 'grab',
-                zIndex: 2000,
+                zIndex: 1001,
                 pointerEvents: 'auto',
               }}
             />
           )}
 
-          <svg width="100%" height="100%" viewBox="-5 -5 110 110" preserveAspectRatio="none">
+            <svg width="100%" height="100%" viewBox="-5 -5 110 110" preserveAspectRatio="none">
+
             <polygon
-              points="50,0 100,50 50,100 0,50"
-              fill={fill}
-              fillOpacity={fillOpacity}
-              stroke={stroke}
-              strokeOpacity={strokeOpacity}
-              strokeWidth={strokeWidth}
+                points="50,0 100,100 0,100"
+                fill={shape.fill || 'black'}
+                stroke={shape.stroke || 'black'}
+                strokeWidth={shape.strokeWidth || 2}
+                fillOpacity={shape.fillOpacity ?? 1}
+                strokeOpacity={shape.strokeOpacity ?? 1}
             />
+
           </svg>
 
           {isSelected && (
@@ -159,8 +147,8 @@ export default function DiamondElement({ shape, onChange, onDelete }) {
               onClick={() => onDelete(shape.id)}
               style={{
                 position: 'absolute',
-                top: 4,
-                right: 4,
+                top: -20,
+                right: -20,
                 background: 'red',
                 color: 'white',
                 border: 'none',
@@ -171,7 +159,7 @@ export default function DiamondElement({ shape, onChange, onDelete }) {
                 fontSize: '12px',
                 lineHeight: '16px',
                 padding: 0,
-                zIndex: 3,
+                zIndex: 10,
               }}
             >
               X

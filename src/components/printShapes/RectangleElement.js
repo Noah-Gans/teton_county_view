@@ -1,7 +1,7 @@
 // RectangleElement.js
 import React, { useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
 export default function RectangleElement({ shape, onChange, onDelete }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();

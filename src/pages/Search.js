@@ -314,7 +314,7 @@ const searchRawOwnershipData = (query, data) => {
                           <div className="result-buttons">
                             <div className="result-buttons-grid">
                               <button className="map-it-button" onClick={() => handleMapClick(result)}>Map</button>
-                              <button className="detail-button" onClick={() => window.open(`https://gis.tetoncountywy.gov/portal/apps/dashboards/ca93f7b7ae3e4d51ad371121a64ee739#accountno=${properties.accountno}`, '_blank')}>
+                              <button className="detail-button" onClick={() => window.open(properties.property_det)}>
                                 Detail
                               </button>
                               <button className="tax-button" onClick={() => window.open(taxLink, '_blank')}>

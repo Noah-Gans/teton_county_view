@@ -14,17 +14,18 @@ import { useMapContext } from './MapContext'; // Adjust path as needed
 import { useUser } from "../contexts/UserContext";
 import useMapboxDraw from "../hooks/useMapboxDraw";
 import queryString from 'query-string';
-import DraggableLegend from '../components/DraggableLegend';
-import DraggableNote from '../components/DraggableNote';
-import ArrowShape from '../components/ArrowShape';
-import CompassElement from '../components/CompassElement';
-import PinElement from '../components/PinElement';
-import RectangleElement from '../components/RectangleElement';
-import DiamondElement from '../components/Diamond';
-import TriangleElement from '../components/Triangle';
-
+import DraggableLegend from '../components/printShapes/DraggableLegend';
+import DraggableNote from '../components/printShapes/DraggableNote';
+import ArrowShape from '../components/printShapes/ArrowShape';
+import CompassElement from '../components/printShapes/CompassElement';
+import PinElement from '../components/printShapes/PinElement';
+import RectangleElement from '../components/printShapes/RectangleElement';
+import DiamondElement from '../components/printShapes/Diamond';
+import TriangleElement from '../components/printShapes/Triangle';
+import ShapeElement from '../components/printShapes/ShapeElement'
 import { legends } from '../assets/legends';
 import { layerNameMappings } from '../components/layerMappings';
+import { useCallback } from "react";
 // Mapbox Access Token
 mapboxgl.accessToken = 'pk.eyJ1Ijoibm9haC1nYW5zIiwiYSI6ImNsb255ajJteDB5Z2gya3BpdXU5M29oY3YifQ.VbPKEHZ91PNoSAH-raskhw';
 
@@ -53,8 +54,6 @@ const tileLayerUrls = {
   mule_deer_reporjected: 'https://storage.googleapis.com/first_bucket_store/tiles_v2/mule_deer_reporjected/{z}/{x}/{y}.pbf',
   precincts: 'https://storage.googleapis.com/first_bucket_store/tiles_v2/precincts/precincts_tiles/{z}/{x}/{y}.pbf',
   FEMA_updated: 'https://storage.googleapis.com/first_bucket_store/tiles_v2/FEMA_updated/{z}/{x}/{y}.pbf',
-
-  
 };
 
 
@@ -105,7 +104,7 @@ const Map = () => {
   const [isPanelOpen, setIsPanelOpen] = useState(true); // State for toggling the side panel
   const [activeSidePanelTab, setActiveSidePanelTab] = useState('layers'); // Manage active tab state
   const navigate = useNavigate(); // Define navigate here
-  const { subscriptionStatus, role } = useUser(); // or subscriptionStatus & user
+  const { subscriptionStatus, role, highlightSettings } = useUser(); // or subscriptionStatus & user
   const [topLayer, setTopLayer] = useState(null);
   const [isMapLoading, setIsMapLoading] = useState(true); // Map loading state
   const highlightLayerId = 'highlight-layer'; // ID for the highlight layer
@@ -146,6 +145,10 @@ const Map = () => {
     );
   })
   .filter(Boolean);
+
+  useEffect(() => {
+    console.log("📍 Map sees new highlight settings:", highlightSettings);
+  }, [highlightSettings]);
   /**
    *  =============== Map Initialization ===============
    *
@@ -222,7 +225,26 @@ const Map = () => {
       let newLayerStatus = {}; 
       let layerList = [];
       
-  
+      mapRef.current.on('load', () => {
+        mapRef.current.addSource('parcels', {
+          type: 'vector',
+          tiles: ['http://localhost:8080/maps/parcels_map/{z}/{x}/{y}.pbf'],
+          minzoom: 6,
+          maxzoom: 18
+        });
+      
+        mapRef.current.addLayer({
+          id: 'parcels-layer',
+          type: 'fill',
+          source: 'parcels',
+          'source-layer': 'parcels', // must match the layer name from Tegola config
+          paint: {
+            'fill-color': '#0080ff',
+            'fill-opacity': 0.5
+          }
+        });
+      });
+      
       // ✅ Step 2: Ensure Layers Are Loaded Before Querying Features
       const params = queryString.parse(routerLocation.search);
       if (params.highlights) {
@@ -1288,9 +1310,8 @@ useEffect(() => {
    * 
    * @param {Array} inputFeatures - Array of Mapbox features to highlight
    */
-  const highlightFeature = (inputFeatures, overrideLayerStatus) => {
+  const highlightFeature = useCallback((inputFeatures, overrideLayerStatus) => {
     const effectiveLayerStatus = overrideLayerStatus ?? layerStatus;
-    // Remove any existing highlights
     console.log("Removing existing highlights...");
     removeHighlight();
   
@@ -1301,57 +1322,34 @@ useEffect(() => {
   
     console.log("Input features for highlighting:", inputFeatures);
   
-    // Step 1: Initialize a dictionary for matching features
     const featureDict = {};
     inputFeatures.forEach((feature) => {
       const featurePidn = feature.properties.Name || feature.properties.pidn || feature.properties.OBJECTID || feature.properties.precinct || feature.properties.FLD_AR_ID;
       if (featurePidn) {
-        featureDict[featurePidn] = []; // Initialize an empty array for this feature
+        featureDict[featurePidn] = [];
       } else {
         console.warn("Feature has no valid PIDN:", feature);
       }
     });
   
-    console.log("Initialized feature dictionary:", featureDict);
-  
-    // Step 2: Query all visible features and populate the dictionary
-    console.log(layerStatus)
     const visibleLayers = Object.keys(effectiveLayerStatus).filter((layerName) => effectiveLayerStatus[layerName]);
-    console.log(`Processing ${visibleLayers.length} visible layers.`);
-  
     visibleLayers.forEach((layerName) => {
-      const queriedFeatures = mapRef.current.queryRenderedFeatures({
-        layers: [`${layerName}-layer`],
-      });
-  
+      const queriedFeatures = mapRef.current.queryRenderedFeatures({ layers: [`${layerName}-layer`] });
       queriedFeatures.forEach((visibleFeature) => {
         const visiblePidn = visibleFeature.properties.Name || visibleFeature.properties.pidn || visibleFeature.properties.OBJECTID || visibleFeature.properties.precinct || visibleFeature.properties.FLD_AR_ID;
         if (featureDict[visiblePidn]) {
-          // If the visible feature matches an input feature, add it to the dictionary
           featureDict[visiblePidn].push(turf.feature(visibleFeature.geometry, visibleFeature.properties));
         }
       });
     });
   
-    console.log("Populated feature dictionary:", featureDict);
-  
-    // Step 3: Process the dictionary to create unified features
     const unifiedFeatures = [];
     Object.keys(featureDict).forEach((pidn) => {
       const matchingParts = featureDict[pidn];
-  
-      if (matchingParts.length === 0) {
-        console.warn(`No matching parts found for PIDN: ${pidn}.`);
-        return;
-      }
-  
       if (matchingParts.length === 1) {
-        // Use the single matching part directly
         unifiedFeatures.push(matchingParts[0]);
-      } else {
-        // Perform a union of all matching parts
+      } else if (matchingParts.length > 1) {
         try {
-          console.log(`Performing union for PIDN: ${pidn} with ${matchingParts.length} parts.`);
           const featureCollection = turf.featureCollection(matchingParts);
           const unifiedFeature = turf.union(featureCollection);
           unifiedFeatures.push(unifiedFeature);
@@ -1361,46 +1359,60 @@ useEffect(() => {
       }
     });
   
-    // Step 4: Add unified features to the map
     if (unifiedFeatures.length > 0) {
       try {
-        const featureCollection = turf.featureCollection(unifiedFeatures);
+        const featureCollection = JSON.parse(JSON.stringify(turf.featureCollection(unifiedFeatures)));
+        const dynamicHighlightId = `${highlightLayerId}-${Date.now()}`;
   
-        // Add a GeoJSON source for highlighting
-        mapRef.current.addSource(highlightLayerId, {
+        // Clean up all previous highlight layers and sources
+        const existingLayers = mapRef.current.getStyle().layers || [];
+        existingLayers.forEach((layer) => {
+          if (layer.id.startsWith(highlightLayerId)) {
+            mapRef.current.removeLayer(layer.id);
+          }
+        });
+        Object.keys(mapRef.current.style.sourceCaches || {}).forEach((sourceId) => {
+          if (sourceId.startsWith(highlightLayerId)) {
+            mapRef.current.removeSource(sourceId);
+          }
+        });
+  
+        mapRef.current.addSource(dynamicHighlightId, {
           type: "geojson",
           data: featureCollection,
         });
   
-        // Add a fill layer for highlights
-        mapRef.current.addLayer({
-          id: highlightLayerId,
-          type: "fill",
-          source: highlightLayerId,
-          paint: {
-            "fill-color": "rgba(255, 0, 0, 0.25)",
-            "fill-outline-color": "#FF0000",
-            "fill-opacity": 1,
-          },
-        });
+        setTimeout(() => {
+          mapRef.current.addLayer({
+            id: dynamicHighlightId,
+            type: "fill",
+            source: dynamicHighlightId,
+            paint: {
+              "fill-color": highlightSettings.fillColor,
+              "fill-outline-color": highlightSettings.fillOutlineColor,
+              "fill-opacity": highlightSettings.fillOpacity ?? 1,
+            },
+          });
   
-        // Add a line layer for feature outlines
-        mapRef.current.addLayer({
-          id: `${highlightLayerId}-outline`,
-          type: "line",
-          source: highlightLayerId,
-          paint: {
-            "line-color": "#FF0000",
-            "line-width": 3,
-          },
-        });
+          mapRef.current.addLayer({
+            id: `${dynamicHighlightId}-outline`,
+            type: "line",
+            source: dynamicHighlightId,
+            paint: {
+              "line-color": highlightSettings.lineColor,
+              "line-width": highlightSettings.lineWidth ?? 3,
+            },
+          });
+        }, 10);
+  
       } catch (error) {
         console.error("Error during map layer creation for highlighted features:", error);
       }
     } else {
       console.warn("No features to highlight.");
     }
-  };
+  }, [layerStatus, highlightSettings]);
+  
     
   /**=============== Remove Highlight ===============
    * Removes the highlight fill + outline layers, along with their data source.
@@ -1600,16 +1612,16 @@ useEffect(() => {
                           onDelete={deletePrintElement}
                         />
                       );
-                    case 'pin':
+                    case 'shape':
                       return (
-                        <PinElement
+                        <ShapeElement
                           key={element.id}
-                          element={element}
+                          shape={element}
                           onDelete={deletePrintElement}
                           onChange={updatePrintElement}
-
                         />
                       );
+                      
                     case 'rectangle':
                       return (
                         <RectangleElement

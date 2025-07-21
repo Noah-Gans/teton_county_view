@@ -1,18 +1,28 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Rnd } from 'react-rnd';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
-export default function TriangleElement({ shape, onChange, onDelete }) {
+export default function DiamondElement({ shape, onChange, onDelete }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();
-  const isSelected = selectedPrintElement?.id === shape.id;
-
+  const [isSelected, setIsSelected] = useState(false);
   const [livePosition, setLivePosition] = useState({ x: shape.x, y: shape.y });
   const [liveSize, setLiveSize] = useState({ width: shape.width, height: shape.height });
   const [rotation, setRotation] = useState(shape.rotation || 0);
 
-  // Correct rotation handler using bounding rect
-  const handleMouseMove = (eMove) => {
-    const shapeElement = document.getElementById(`triangle-${shape.id}`);
+  const fill = shape.fill || '#000000';
+  const stroke = shape.stroke || '#000000';
+  const strokeWidth = shape.strokeWidth ?? 2;
+  const fillOpacity = shape.fillOpacity ?? 1;
+  const strokeOpacity = shape.strokeOpacity ?? 1;
+
+
+  useEffect(() => {
+    console.log("came here")
+    setIsSelected(selectedPrintElement?.id === shape.id);
+  }, [selectedPrintElement, shape.id]);
+
+  const handleRotation = (eMove) => {
+    const shapeElement = document.getElementById(`diamond-${shape.id}`);
     if (!shapeElement) return;
 
     const rect = shapeElement.getBoundingClientRect();
@@ -21,25 +31,24 @@ export default function TriangleElement({ shape, onChange, onDelete }) {
 
     const dx = eMove.pageX - centerX;
     const dy = eMove.pageY - centerY;
-
     const angle = Math.atan2(dx, -dy) * (180 / Math.PI);
-    const updatedRotation = Math.round(angle);
+    const newRot = Math.round(angle);
 
-    setRotation(updatedRotation);
-    onChange({ ...shape, rotation: updatedRotation });
+    setRotation(newRot);
+    onChange({ ...shape, rotation: newRot });
   };
 
   return (
     <>
-      {/* Green bounding box */}
+      {/* Green dashed edit box */}
       {isSelected && (
         <div
           style={{
             position: 'absolute',
-            top: livePosition.y - 1,
-            left: livePosition.x - 1,
-            width: liveSize.width + 2,
-            height: liveSize.height + 2,
+            top: livePosition.y - 2,
+            left: livePosition.x - 2,
+            width: liveSize.width + 10,
+            height: liveSize.height + 4,
             border: '2px dashed #1d784f',
             borderRadius: '4px',
             zIndex: 999,
@@ -52,9 +61,14 @@ export default function TriangleElement({ shape, onChange, onDelete }) {
 
       <Rnd
         bounds="parent"
+        
         size={liveSize}
         position={livePosition}
         onClick={() => setSelectedPrintElement(shape)}
+        onClick={(e) => {
+          e.stopPropagation(); // Prevents deselection
+          setSelectedPrintElement(shape);
+        }}
         onDrag={(e, d) => setLivePosition({ x: d.x, y: d.y })}
         onDragStop={(e, d) => {
           const updated = { ...shape, x: d.x, y: d.y };
@@ -89,7 +103,7 @@ export default function TriangleElement({ shape, onChange, onDelete }) {
         }}
       >
         <div
-          id={`triangle-${shape.id}`}
+          id={`diamond-${shape.id}`}
           style={{
             width: '100%',
             height: '100%',
@@ -98,48 +112,46 @@ export default function TriangleElement({ shape, onChange, onDelete }) {
             transformOrigin: 'center center',
           }}
         >
-          {/* Rotation Handle inside the rotated element */}
+          {/* ✅ Rotation anchor inside rotated context */}
           {isSelected && (
             <div
               onMouseDown={(e) => {
                 e.stopPropagation();
-                window.addEventListener('mousemove', handleMouseMove);
+                window.addEventListener('mousemove', handleRotation);
                 window.addEventListener(
                   'mouseup',
                   () => {
-                    window.removeEventListener('mousemove', handleMouseMove);
+                    window.removeEventListener('mousemove', handleRotation);
                   },
                   { once: true }
                 );
               }}
               style={{
                 position: 'absolute',
+                top: -30,
                 left: '50%',
-                top: 10,
-                transform: `translate(-50%, -40px) rotate(${-rotation}deg)`,
+                transform: 'translateX(-50%)',
                 width: 20,
                 height: 20,
                 backgroundColor: '#1d784f',
                 borderRadius: '50%',
                 border: '2px solid white',
                 cursor: 'grab',
-                zIndex: 1001,
+                zIndex: 2000,
                 pointerEvents: 'auto',
               }}
             />
           )}
 
-            <svg width="100%" height="100%" viewBox="-5 -5 110 110" preserveAspectRatio="none">
-
+          <svg width="100%" height="100%" viewBox="-5 -5 110 110" preserveAspectRatio="none">
             <polygon
-                points="50,0 100,100 0,100"
-                fill={shape.fill || 'black'}
-                stroke={shape.stroke || 'black'}
-                strokeWidth={shape.strokeWidth || 2}
-                fillOpacity={shape.fillOpacity ?? 1}
-                strokeOpacity={shape.strokeOpacity ?? 1}
+              points="50,0 100,50 50,100 0,50"
+              fill={fill}
+              fillOpacity={fillOpacity}
+              stroke={stroke}
+              strokeOpacity={strokeOpacity}
+              strokeWidth={strokeWidth}
             />
-
           </svg>
 
           {isSelected && (
@@ -147,8 +159,8 @@ export default function TriangleElement({ shape, onChange, onDelete }) {
               onClick={() => onDelete(shape.id)}
               style={{
                 position: 'absolute',
-                top: -20,
-                right: -20,
+                top: 4,
+                right: 4,
                 background: 'red',
                 color: 'white',
                 border: 'none',
@@ -159,7 +171,7 @@ export default function TriangleElement({ shape, onChange, onDelete }) {
                 fontSize: '12px',
                 lineHeight: '16px',
                 padding: 0,
-                zIndex: 10,
+                zIndex: 3,
               }}
             >
               X

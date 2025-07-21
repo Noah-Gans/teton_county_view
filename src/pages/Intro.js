@@ -50,7 +50,7 @@ const Intro = ({ onStartClick }) => {
   
 
   const handleTutorialClick = () => {
-    setIsTutorialOpen(true); // Open the tutorial popup
+    navigate('/tutorial', { state: { fromIntro: true } });
   };
 
   const handleCloseTutorial = () => {
@@ -186,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
       {/* Top-left header navigation */}
       <div className="intro-header-nav">
         <button className="header-button" onClick={() => navigate('/updates')}>Updates</button>
+        <button className="header-button" onClick={handleTutorialClick}>Tutorial</button>
         <a className="header-button" href="mailto:noahgans@tetoncountygis.com" target="_blank" rel="noopener noreferrer">Contact</a>
         {/* Optional Share button */}
         <button className="header-button" onClick={handleOpenShare}>Share</button>
@@ -193,9 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       <h1 className="intro-title">The Better Teton County, Wyoming GIS Hub</h1>
       <h2>Contact Us for Teton County GIS Support</h2>
-      <div className="floating-update-banner">
-        <p><strong>3D maps added!</strong><br />Select them as a base-map. Contact us if you have issues!</p>
-      </div>
+      
 
 
       

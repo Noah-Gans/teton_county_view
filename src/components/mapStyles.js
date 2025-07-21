@@ -345,6 +345,7 @@ export const loadCustomIcons = (map) => {
         visibility: 'visible',
       },
     },
+    
     precincts: {
       id: 'precincts-layer',
       type: 'fill',

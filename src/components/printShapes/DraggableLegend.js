@@ -1,7 +1,7 @@
 // DraggableLegend.js
 import React, { useState } from 'react';
 import { Rnd } from 'react-rnd';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
 export default function DraggableLegend({ id, children, onDelete }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();

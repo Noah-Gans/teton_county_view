@@ -5,6 +5,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase/firebaseConfig"; // import your Firestore instance
 import { getFunctions, httpsCallable } from "firebase/functions";
 import "./LoginDropdown.css";
+import HighlightSettingsPopup from "../components/HighlightSettingsPopup";
 
 const LoginDropdown = () => {
   const { user, logout } = useUser(); // Access user and logout function
@@ -12,6 +13,7 @@ const LoginDropdown = () => {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [role, setRole] = useState(null);
   const navigate = useNavigate(); // Define navigate here
+  const [showHighlightPopup, setShowHighlightPopup] = useState(false);
   const toggleDropdown = () => {
     setIsOpen((prev) => !prev); // Toggle dropdown
   };
@@ -52,8 +54,17 @@ const LoginDropdown = () => {
         const userSnap = await getDoc(userDocRef);
         if (userSnap.exists()) {
           const data = userSnap.data();
+          console.log("📄 Fetched Firestore data:", data);
+          console.log("🔍 subscriptionStatus:", data.subscriptionStatus);
+
           setSubscriptionStatus(data.subscriptionStatus || "none");
           setRole(data.role || "none");
+          const rawStatus = data.subscriptionStatus;
+          const normalizedStatus = rawStatus?.toString().trim().toLowerCase();
+          const isActive = normalizedStatus === "active";
+          console.log("🔍 subscriptionStatus:", rawStatus);
+          console.log("🧼 Normalized:", normalizedStatus);
+          console.log("✅ isActive:", isActive);
         } else {
           setSubscriptionStatus("none");
         }
@@ -144,6 +155,13 @@ const LoginDropdown = () => {
                 <button className="dropdown-button logout-button" onClick={handleLogout}>
                   Sign Out
                 </button>
+                <button
+                  className="dropdown-button"
+                  onClick={() => setShowHighlightPopup(true)}
+                >
+                  Highlight Settings
+                </button>
+
               </>
             ) : (
               <button className="dropdown-item" onClick={() => navigate("/login")}>
@@ -190,6 +208,12 @@ const LoginDropdown = () => {
                 <button className="dropdown-button logout-button" onClick={handleLogout}>
                   Sign Out
                 </button>
+                <button
+                  className="dropdown-button"
+                  onClick={() => setShowHighlightPopup(true)}
+                >
+                  Highlight Settings
+                </button>
               </>
             ) : (
               <button className="dropdown-item" onClick={() => navigate("/login")}>
@@ -206,6 +230,9 @@ const LoginDropdown = () => {
             <p>🔒 Taking you to your secure billing portal... Please wait.</p>
           </div>
         </div>
+      )}
+      {showHighlightPopup && (
+      <HighlightSettingsPopup onClose={() => setShowHighlightPopup(false)} />
       )}
     </div>
   );

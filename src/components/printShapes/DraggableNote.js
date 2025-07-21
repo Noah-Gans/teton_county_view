@@ -1,6 +1,6 @@
 import React from 'react';
 import { Rnd } from 'react-rnd';
-import { useMapContext } from '../pages/MapContext';
+import { useMapContext } from '../../pages/MapContext';
 
 export default function DraggableNote({ note, onNoteChange, onDelete }) {
   const { selectedPrintElement, setSelectedPrintElement } = useMapContext();
@@ -28,10 +28,12 @@ export default function DraggableNote({ note, onNoteChange, onDelete }) {
   bounds="parent"
   position={{ x: note.x, y: note.y }}
   size={{ width: note.width, height: note.height }}
-  onClick={e => {
+  onClick={(e) => {
     e.stopPropagation();
-    setSelectedPrintElement({ id: note.id });
+    console.log('[Note Clicked]', note); // ✅ Log the full note
+    setSelectedPrintElement(note);       // ✅ Pass full object
   }}
+  
   onDragStop={(e, d) => {
     onNoteChange({ ...note, x: d.x, y: d.y });
   }}

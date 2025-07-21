@@ -457,7 +457,7 @@ const SidePanel = memo(({
                   </button>
                   {isOwnershipOpen && (
                     <ul>
-                      {['ownership', 'ownership_address'].map((layerName) => (
+                      {['ownership', 'PARCELS','lincoln_county_ownership', 'sublette_county_ownership', 'ownership_address'].map((layerName) => (
                         <li key={layerName}>
                           <label>
                             <input

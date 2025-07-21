@@ -12,6 +12,18 @@ export function UserProvider({ children }) {
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
   const [role, setRole] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [highlightSettings, setHighlightSettings] = useState({
+    fillColor: 'rgba(255, 0, 0, 0.25)',
+    fillOutlineColor: '#FF0000',
+    lineColor: '#FF0000',
+    fillOpacity: 1,
+    lineWidth: 3,
+  });
+
+  useEffect(() => {
+    console.log("🔧 highlightSettings updated:", highlightSettings);
+  }, [highlightSettings]);
+  
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -49,7 +61,7 @@ export function UserProvider({ children }) {
 
   // Provide user, subscriptionStatus, and loading to the rest of the app
   return (
-    <UserContext.Provider value={{ user, subscriptionStatus,role, loading, logout }}>
+    <UserContext.Provider value={{ user, subscriptionStatus,role, loading, logout, highlightSettings, setHighlightSettings}}>
       {children}
     </UserContext.Provider>
   );

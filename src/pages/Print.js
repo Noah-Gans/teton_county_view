@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useMapContext } from './MapContext';
 import './Print.css';
+import { svgMap } from '../components/printShapes/svgMap'; // Adjust path as needed
 
 export default function PrintOverlay({ onClose }) {
   const {
@@ -11,13 +12,15 @@ export default function PrintOverlay({ onClose }) {
     clearPrintElements,
     addLegend,
     addCompass,
+    addCircle,
     addPin,
     addRectangle,
     addDiamond,
     addTriangle,
     selectedPrintElement,
     updatePrintElement,
-    setSelectedPrintElement
+    setSelectedPrintElement,
+    addShape
   } = useMapContext();
   const [isOpen, setIsOpen] = useState(true);
   const [orientation, setOrientation] = useState('portrait');
@@ -53,6 +56,7 @@ export default function PrintOverlay({ onClose }) {
       }
     }, 50);
   
+    console.log('[PrintOverlay] selectedPrintElement:', selectedPrintElement);
     return () => {
       console.log('Exiting print mode');
       setIsPrinting(false);
@@ -72,6 +76,7 @@ export default function PrintOverlay({ onClose }) {
       }
     };
   }, []);
+
   // Switch orientation & paperSize
   const handleChangeOrientation = (e) => {
     const newOrientation = e.target.value;
@@ -90,6 +95,7 @@ export default function PrintOverlay({ onClose }) {
       if (scrollWrapper) scrollWrapper.scrollLeft = 0;
     }, 50);
   };
+
   const handlePrint = () => {
     setSelectedPrintElement(null);
     const old = document.getElementById('dynamic-print-style');
@@ -109,13 +115,20 @@ export default function PrintOverlay({ onClose }) {
     setTimeout(() => window.print(), 50);
   };
   
-  
+  console.log('[PrintOverlay] render called'); // always prints if component renders
+
+  useEffect(() => {
+    console.log('[PrintOverlay] mounted');
+  }, []);
+
 
   // Add a new note
   const handleAddNote = () => {
     addNote(); // calls the context function that pushes a new note
   };
-
+  useEffect(() => {
+    console.log('[useEffect] selectedPrintElement changed:', selectedPrintElement);
+  }, [selectedPrintElement]);
   return (
     <div className="print-overlay">
       <div className={`print-panel ${isOpen ? '' : 'closed'}`}>
@@ -160,26 +173,56 @@ export default function PrintOverlay({ onClose }) {
             <div className="scroll-section">
             <h4>Add Shape</h4>
             <div className="scroll-container">
+              {/* Add arrow button separately */}
               <div className="tooltip-wrapper">
-                <button onClick={addRectangle}>⬛</button>
-                <span className="tooltip-text">Rectangle</span>
-              </div>
-              <div className="tooltip-wrapper">
-                <button onClick={addArrowShape}>➡️</button>
+                <button onClick={addArrowShape}>
+                  ➡️
+                </button>
                 <span className="tooltip-text">Arrow</span>
               </div>
-              <div className="tooltip-wrapper">
-                <button onClick={addDiamond}>🔷</button>
-                <span className="tooltip-text">Diamond</span>
-              </div>
-              <div className="tooltip-wrapper">
-                <button onClick={addTriangle}>🔺</button>
-                <span className="tooltip-text">Triangle</span>
-              </div>
-              <div className="tooltip-wrapper">
-                <button onClick={addPin}>📍</button>
-                <span className="tooltip-text">Pin</span>
-              </div>
+              {[
+                { key: 'triangle', label: 'Triangle' },
+                { key: 'square', label: 'square' },
+                { key: 'diamond', label: 'diamond' },
+                { key: 'circle', label: 'circle' },
+                { key: 'pin', label: 'Pin' },
+                { key: 'home', label: 'home' },
+                { key: 'airport', label: 'Airport' },
+                { key: 'mountain', label: 'Mountain' },
+                { key: 'mountains2', label: 'mountains2' },
+                { key: 'trail', label: 'trail' },
+                { key: 'park', label: 'park' },
+                { key: 'hiker', label: 'hiker' },
+                { key: 'school', label: 'school' },
+                { key: 'bank', label: 'Bank' },
+                { key: 'climb1', label: 'climb1' },
+                { key: 'gym', label: 'Gym' },
+                { key: 'climb2', label: 'climb2' },
+                { key: 'iceCream', label: 'iceCream' },
+                { key: 'lake', label: 'lake' },
+                { key: 'shop', label: 'shop' },
+                { key: 'groceryStore', label: 'groceryStore' },
+                { key: 'trailSign', label: 'trailSign' },
+                { key: 'forest', label: 'forest' },
+                { key: 'forest2', label: 'forest2' },
+
+
+              ].map(({ key, label }) => (
+                <div key={key} className="tooltip-wrapper">
+                  <button onClick={() => addShape(key)}>
+                    {svgMap[key]({
+                      fill: '#000',
+                      stroke: '#000',
+                      strokeWidth: 1,
+                      fillOpacity: 1,
+                      strokeOpacity: 1
+                    })}
+                  </button>
+                  <span className="tooltip-text">{label}</span>
+                </div>
+              ))}
+
+              
             </div>
           </div>
 
@@ -194,12 +237,24 @@ export default function PrintOverlay({ onClose }) {
                 <button onClick={addLegend}>📚</button>
                 <span className="tooltip-text">Legend</span>
               </div>
-             
+              <div className="tooltip-wrapper">
+                <button onClick={() => addShape('compass')}>
+                  {svgMap['compass']({
+                    fill: '#000',
+                    stroke: '#000',
+                    strokeWidth: 1,
+                    fillOpacity: 1,
+                    strokeOpacity: 1,
+                  })}
+                </button>
+                <span className="tooltip-text">Compass</span>
+              </div>
             </div>
           </div>
+
           {/* 🎨 Edit Panel */}
 {/* 🎨 Edit Panel */}
-{selectedPrintElement && ['triangle', 'rectangle', 'diamond', 'pin', 'note', 'arrow'].includes(selectedPrintElement.type) && (
+{selectedPrintElement && ['shape','triangle', 'rectangle', 'diamond', 'note', 'arrow', 'pin'].includes(selectedPrintElement.type) && (
   <div className="scroll-section">
     <h4>Edit {selectedPrintElement.type === 'note' ? 'Note' : 'Shape'}</h4>
     <div className="edit-panel">
