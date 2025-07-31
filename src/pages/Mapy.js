@@ -29,9 +29,9 @@ import { useCallback } from "react";
 // Mapbox Access Token
 mapboxgl.accessToken = 'pk.eyJ1Ijoibm9haC1nYW5zIiwiYSI6ImNsb255ajJteDB5Z2gya3BpdXU5M29oY3YifQ.VbPKEHZ91PNoSAH-raskhw';
 
-// URLs for vector tile layers in GCS
+// URLs for vector tile layers in Tegola (local server)
 const tileLayerUrls = {
-  ownership: 'https://storage.googleapis.com/first_bucket_store/test_tiles_v3/ownership/{z}/{x}/{y}.pbf',
+  ownership: 'http://localhost:8080/maps/ownership_map/{z}/{x}/{y}.pbf',
   zoning: 'https://storage.googleapis.com/first_bucket_store/test_tiles_v3/zoning/{z}/{x}/{y}.pbf',
   conservation_easements: 'https://storage.googleapis.com/first_bucket_store/test_tiles_v3/conservation_easements/{z}/{x}/{y}.pbf',
   control_points_controls: 'https://storage.googleapis.com/first_bucket_store/test_tiles_v3/control_points_controls/{z}/{x}/{y}.pbf',
@@ -240,11 +240,11 @@ const Map = () => {
           'source-layer': 'parcels', // must match the layer name from Tegola config
           paint: {
             'fill-color': '#0080ff',
-            'fill-opacity': 0.5
+            'fill-opacity': 0.4,
           }
         });
       });
-      
+      window.mapRef = mapRef;
       // ✅ Step 2: Ensure Layers Are Loaded Before Querying Features
       const params = queryString.parse(routerLocation.search);
       if (params.highlights) {
@@ -480,7 +480,7 @@ useEffect(() => {
 
   function selectParcelsInsidePolygon(polygon) {
     console.log("🔍 Querying features within selection polygon...");
-  
+
     // Get all visible ownership features
     const queriedFeatures = mapRef.current.queryRenderedFeatures({
         layers: ["ownership-layer"], // Adjust to match your ownership layer ID
@@ -492,17 +492,15 @@ useEffect(() => {
     }
 
     console.log(`🗺️ Queried ${queriedFeatures.length} features from ownership layer.`);
-  
+
     // Convert the drawn polygon to a Turf.js Polygon
     const selectionPolygon = turf.polygon(polygon.coordinates);
-  
-    // Filter features that are **fully enclosed** by the selection polygon
+
+    // Filter features that are **fully enclosed** by the selection polygon and have a valid global_parcel_uid
     const selectedFeatures = queriedFeatures.filter((feature) => {
         if (!feature.geometry) return false;
-
-        // Convert feature to Turf.js feature
+        if (!feature.properties.global_parcel_uid) return false;
         let featureGeometry = turf.feature(feature.geometry);
-
         // 🛑 Handle MultiPolygons
         if (feature.geometry.type === "MultiPolygon") {
             return feature.geometry.coordinates.every((polyCoords) => {
@@ -510,7 +508,6 @@ useEffect(() => {
                 return turf.booleanContains(selectionPolygon, individualPolygon);
             });
         }
-
         // ✅ For regular Polygons, apply normal check
         return turf.booleanContains(selectionPolygon, featureGeometry);
     });
@@ -854,19 +851,21 @@ useEffect(() => {
           mapRef.current.dragPan.disable(); // Temporarily disable dragPan
   
           const clickedFeature = features[0];
-          const clickedPidn = clickedFeature.properties.Name || clickedFeature.properties.pidn || clickedFeature.properties.OBJECTID || clickedFeature.properties.precinct || clickedFeature.properties.FLD_AR_ID;
-  
+          const clickedPidn = clickedFeature.properties.global_parcel_uid;
+          console.log("Clicked PIDN:", clickedPidn)
           setSelectedFeatures((prevFeatures) => {
             const isAlreadySelected = prevFeatures.some(
-              (f) => (f.properties.Name || f.properties.pidn || f.properties.OBJECTID || f.properties.precinct || f.properties.FLD_AR_ID) === clickedPidn
+              (f) => (f.properties.global_parcel_uid || f.properties.pidn || f.properties.OBJECTID || f.properties.precinct || f.properties.FLD_AR_ID) === clickedPidn
             );
-  
+            console.log("Is already selected:", isAlreadySelected)
             if (e.originalEvent.shiftKey) {
               console.log("Shift key is held down.");
               if (isAlreadySelected) {
                 console.log("Feature is already selected. Removing it from selection.");
+                console.log("Prev Features:", prevFeatures)
+                console.log("Clicked Feature:", clickedFeature)
                 const updatedSelection = prevFeatures.filter(
-                  (f) => (f.properties.Name || f.properties.pidn) !== clickedPidn
+                  (f) => (f.properties.global_parcel_uid || f.properties.pidn) !== clickedPidn
                 );
                 highlightFeature(updatedSelection);
                 return updatedSelection;
@@ -1324,7 +1323,7 @@ useEffect(() => {
   
     const featureDict = {};
     inputFeatures.forEach((feature) => {
-      const featurePidn = feature.properties.Name || feature.properties.pidn || feature.properties.OBJECTID || feature.properties.precinct || feature.properties.FLD_AR_ID;
+      const featurePidn = feature.properties.global_parcel_uid;
       if (featurePidn) {
         featureDict[featurePidn] = [];
       } else {
@@ -1336,7 +1335,7 @@ useEffect(() => {
     visibleLayers.forEach((layerName) => {
       const queriedFeatures = mapRef.current.queryRenderedFeatures({ layers: [`${layerName}-layer`] });
       queriedFeatures.forEach((visibleFeature) => {
-        const visiblePidn = visibleFeature.properties.Name || visibleFeature.properties.pidn || visibleFeature.properties.OBJECTID || visibleFeature.properties.precinct || visibleFeature.properties.FLD_AR_ID;
+        const visiblePidn = visibleFeature.properties.global_parcel_uid;
         if (featureDict[visiblePidn]) {
           featureDict[visiblePidn].push(turf.feature(visibleFeature.geometry, visibleFeature.properties));
         }
@@ -1418,19 +1417,27 @@ useEffect(() => {
    * Removes the highlight fill + outline layers, along with their data source.
    * @param {Array} [featuresToRemove=[]] Optional array of features if needed
    */
-  const removeHighlight = (featuresToRemove = []) => {
-    // Remove all layers that depend on the highlight source
-    if (mapRef.current.getLayer(highlightLayerId)) {
-      mapRef.current.removeLayer(highlightLayerId);
-    }
-    if (mapRef.current.getLayer(`${highlightLayerId}-outline`)) {
-      mapRef.current.removeLayer(`${highlightLayerId}-outline`);
-    }
-  
-    // Once all layers are removed, remove the source
-    if (mapRef.current.getSource(highlightLayerId)) {
-      mapRef.current.removeSource(highlightLayerId);
-    }
+  const removeHighlight = () => {
+    const style = mapRef.current.getStyle();
+    if (!style) return;
+
+    // Remove all highlight layers
+    (style.layers || []).forEach((layer) => {
+      if (layer.id.startsWith(highlightLayerId)) {
+        if (mapRef.current.getLayer(layer.id)) {
+          mapRef.current.removeLayer(layer.id);
+        }
+      }
+    });
+
+    // Remove all highlight sources
+    Object.keys(mapRef.current.style.sourceCaches || {}).forEach((sourceId) => {
+      if (sourceId.startsWith(highlightLayerId)) {
+        if (mapRef.current.getSource(sourceId)) {
+          mapRef.current.removeSource(sourceId);
+        }
+      }
+    });
   };
   
 
@@ -1476,6 +1483,52 @@ useEffect(() => {
     }
   }, [paperSize]);
   
+  // Add this MVP Tegola layer on map load for debugging
+  useEffect(() => {
+    if (!mapRef.current) return;
+    return;
+    // Handler to add the Tegola layer after style is loaded
+    const addTegolaLayer = () => {
+      try {
+        if (!mapRef.current.getSource('parcels')) {
+          mapRef.current.addSource('parcels', {
+            type: 'vector',
+            tiles: ['http://localhost:8080/maps/parcels_map/{z}/{x}/{y}.pbf'],
+            minzoom: 6,
+            maxzoom: 18,
+          });
+        }
+        if (!mapRef.current.getLayer('parcels-layer')) {
+          mapRef.current.addLayer({
+            id: 'parcels-layer',
+            type: 'fill',
+            source: 'parcels',
+            'source-layer': 'parcels',
+            paint: {
+              'fill-color': '#ff0000',
+              'fill-opacity': 1,
+            },
+          });
+        }
+      } catch (e) {
+        console.error("Error adding Tegola MVP layers:", e);
+      }
+    };
+
+    // Listen for style.load and add the layer
+    mapRef.current.on('style.load', addTegolaLayer);
+
+    // If the style is already loaded, add immediately
+    if (mapRef.current.isStyleLoaded()) {
+      addTegolaLayer();
+    }
+
+    // Cleanup
+    return () => {
+      mapRef.current.off('style.load', addTegolaLayer);
+    };
+  }, [mapRef]);
+
   return (
     
     <div className="map-container">

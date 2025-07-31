@@ -136,7 +136,7 @@ const SidePanel = memo(({
   
     // Determine feature type based on available properties
     
-    const isOwnershipFeature = parsedDescription.pidn || parsedDescription.accountno || parsedDescription.tax_id;
+    const isOwnershipFeature = feature.properties.global_parcel_uid && feature.properties.owner_name;
     const isOwnershipAddress = parsedDescription.msag_zip || parsedDescription.st_name;
     const isPublicLandFeature = feature.properties.SURFACE || parsedDescription.holdagency || parsedDescription.sma_id;
     const isPrecinct = feature.properties.objectid || feature.pollingpla
@@ -157,42 +157,35 @@ const SidePanel = memo(({
           </>
         ) : isOwnershipFeature ? (
           <>
-            <div><strong>Parcel:</strong> {parsedDescription.pidn || 'N/A'}</div>
-            <div><strong>Account#:</strong> {parsedDescription.accountno || 'N/A'}</div>
-            <div><strong>Tax ID:</strong> {parsedDescription.tax_id || 'N/A'}</div>
-            <div><strong>Owner:</strong> {parsedDescription.owner || 'N/A'}</div>
-            <div><strong>Physical Address</strong> {feature.properties.st_address || 'N/A'}</div>
-            <div><strong>Mail Addr:</strong> {parsedDescription.address ? `${parsedDescription.address}, ${parsedDescription.owner_city}, ${parsedDescription.owner_state}` : 'N/A'}</div>
-            <div><strong>Tax Classification:</strong> {parsedDescription.accttype || 'N/A'}</div>
-            <div><strong>Area (Tax):</strong> {parsedDescription.area_tax ? `${parsedDescription.area_tax} acres` : 'N/A'}</div>
-            <div><strong>Area (Calculated):</strong> {parsedDescription.area_calc || 'N/A'}</div>
-  
-            {/* Clerk Record Link */}
-            {parsedDescription.clerk_rec && (
-              <div>
-                <strong>Clerk Record:</strong>
-                <a href={parsedDescription.clerk_rec} target="_blank" rel="noopener noreferrer" className="link-button">
-                  View Clerk Record
-                </a>
-              </div>
-            )}
-  
-            {/* Property Details Link */}
-            {parsedDescription.property_det && (
+            <div><strong>County:</strong> {feature.properties.county || 'N/A'}</div>
+            <div><strong>State:</strong> {feature.properties.state || 'N/A'}</div>
+            <div><strong>Parcel ID:</strong> {feature.properties.county_parcel_id_num || 'N/A'}</div>
+            <div><strong>Owner Name:</strong> {feature.properties.owner_name || 'N/A'}</div>
+            <div><strong>Physical Address:</strong> {feature.properties.physical_address || 'N/A'}</div>
+            <div><strong>Mailing Address:</strong> {feature.properties.mailing_address || 'N/A'}</div>
+            <div><strong>Acreage:</strong> {feature.properties.acreage || 'N/A'}</div>
+            <div><strong>Property Value:</strong> {feature.properties.property_value || 'N/A'}</div>
+            {feature.properties.property_details_link && (
               <div>
                 <strong>Property Details:</strong>
-                <a href={parsedDescription.property_det} target="_blank" rel="noopener noreferrer" className="link-button">
+                <a href={feature.properties.property_details_link} target="_blank" rel="noopener noreferrer" className="link-button">
                   View Property Details
                 </a>
               </div>
             )}
-  
-            {/* Tax Info Link */}
-            {parsedDescription.tax_info && (
+            {feature.properties.tax_details_link && (
               <div>
-                <strong>Property Taxes:</strong>
-                <a href={parsedDescription.tax_info} target="_blank" rel="noopener noreferrer" className="link-button">
-                  Tax Information
+                <strong>Tax Details:</strong>
+                <a href={feature.properties.tax_details_link} target="_blank" rel="noopener noreferrer" className="link-button">
+                  View Tax Details
+                </a>
+              </div>
+            )}
+            {feature.properties.clerk_records_link && (
+              <div>
+                <strong>Clerk Records:</strong>
+                <a href={feature.properties.clerk_records_link} target="_blank" rel="noopener noreferrer" className="link-button">
+                  View Clerk Records
                 </a>
               </div>
             )}
@@ -457,7 +450,7 @@ const SidePanel = memo(({
                   </button>
                   {isOwnershipOpen && (
                     <ul>
-                      {['ownership', 'PARCELS','lincoln_county_ownership', 'sublette_county_ownership', 'ownership_address'].map((layerName) => (
+                      {['ownership', 'parcels','lincoln_county_ownership', 'sublette_county_ownership', 'ownership_address'].map((layerName) => (
                         <li key={layerName}>
                           <label>
                             <input
